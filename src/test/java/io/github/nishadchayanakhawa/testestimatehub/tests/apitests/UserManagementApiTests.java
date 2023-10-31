@@ -1,11 +1,10 @@
 package io.github.nishadchayanakhawa.testestimatehub.tests.apitests;
 
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.Test;
+import io.cucumber.testng.AbstractTestNGCucumberTests;
+import io.cucumber.testng.CucumberOptions;
 
-public class UserManagementApiTests extends AbstractTestNGSpringContextTests {
-	@Test
-	public void userManagementTest() {
-		
-	}
+@CucumberOptions(
+		features = "src/test/resources/Features",
+		glue = "io.nishadc.automationtestingframework.testinginterface.restapi.stepdefinitions")
+public class UserManagementApiTests extends AbstractTestNGCucumberTests{
 }

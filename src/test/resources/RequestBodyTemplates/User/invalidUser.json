@@ -1,0 +1,9 @@
+{
+	"username" : "",
+	"password" : "dummy",
+	"firstName" : null,
+	"email" : "",
+	"roles" : [
+		"TESTER"
+	]
+}

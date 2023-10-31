@@ -1,0 +1,10 @@
+{
+	"username" : "${username}",
+	"password" : "${password}",
+	"firstName" : "${firstName}",
+	"lastName" : "LNU",
+	"email" : "${email}",
+	"roles" : [
+		"TESTER"
+	]
+}
