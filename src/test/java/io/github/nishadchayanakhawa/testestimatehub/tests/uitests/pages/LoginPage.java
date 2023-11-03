@@ -1,10 +1,13 @@
 package io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages;
 
+import java.util.logging.Level;
+
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.chrome.ChromeOptions;
+
 import io.github.bonigarcia.wdm.WebDriverManager;
 
 public class LoginPage extends BasePage {
@@ -23,8 +26,9 @@ public class LoginPage extends BasePage {
 	}
 	
 	public static LoginPage getLoginPage() {
+		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
 		ChromeOptions options = new ChromeOptions();
-		//options.addArguments("--headless=new");
+		options.addArguments("--headless=new");
 		options.addArguments("--remote-allow-origins=*");
 		WebDriver driver=WebDriverManager.chromedriver().capabilities(options).create();
 		driver.manage().window().setSize(new Dimension(1920,1080));

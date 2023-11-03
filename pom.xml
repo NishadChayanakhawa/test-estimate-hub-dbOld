@@ -55,6 +55,9 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
+					<systemPropertyVariables>
+						<webdriver.chrome.silentOutput>true</webdriver.chrome.silentOutput>
+					</systemPropertyVariables>
 					<argLine>${failsafe.jacoco.args}</argLine>
 					<skip>${skipTests}</skip>
 					<suiteXmlFiles>
