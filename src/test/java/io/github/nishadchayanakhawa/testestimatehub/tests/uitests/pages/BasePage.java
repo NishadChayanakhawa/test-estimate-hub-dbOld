@@ -37,6 +37,7 @@ public class BasePage extends ApplicationActions {
 		this.clickNavbarTogglerIfAvailable();
 		this.driverWait.until(ExpectedConditions.visibilityOf(userLink));
 		this.clickElement(userLink);
+		this.driverWait.until(ExpectedConditions.visibilityOf(logoutButton));
 		this.clickElement(logoutButton);
 		this.driver.quit();
 	}
@@ -51,6 +52,7 @@ public class BasePage extends ApplicationActions {
 		this.clickNavbarTogglerIfAvailable();
 		this.driverWait.until(ExpectedConditions.visibilityOf(configurationLink));
 		this.clickElement(configurationLink);
+		this.driverWait.until(ExpectedConditions.visibilityOf(userManagementOption));
 		this.clickElement(userManagementOption);
 		return new UserManagementPage(this.driver);
 	}
