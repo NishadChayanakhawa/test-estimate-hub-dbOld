@@ -24,16 +24,6 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityFilterConfiguration {
 	private static final String H2_CONSOLE_CONTEXT_MATCHER = "/h2-console/**";
 
-//	@Bean
-//	@Order(2)
-//	@Profile("!dev")
-//	SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-//		return http.authorizeHttpRequests(
-//				request -> request.requestMatchers(AntPathRequestMatcher.antMatcher("/api/configuration/**"))
-//						.hasRole(Role.ADMIN.toString()).anyRequest().permitAll())
-//				.build();
-//	}
-
 	@Bean
 	@Order(2)
 	@Profile("!dev")

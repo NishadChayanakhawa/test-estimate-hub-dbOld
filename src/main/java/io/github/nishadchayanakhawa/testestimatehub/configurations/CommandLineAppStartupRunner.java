@@ -18,8 +18,12 @@ import io.github.nishadchayanakhawa.testestimatehub.services.UserService;
 public class CommandLineAppStartupRunner  implements CommandLineRunner{
 	private static final Logger logger=LoggerFactory.getLogger(CommandLineAppStartupRunner.class);
 	
-	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	public CommandLineAppStartupRunner(UserService userService) {
+		this.userService=userService;
+	}
 
 	@Override
 	public void run(String... args) throws Exception {
