@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />	
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/record/releaseProcessing.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script>
+		$(document).ready(function () {
+			releaseProcessing.init();
+		});
+	</script>
+	<script id="releaseRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')">
+		<tr>
+			<td>${identifier}</td>
+			<td>${name}</td>
+			<td>
+				<button class="border-0 bg-transparent" id="editRelease_${id}">
+					<i class="fa fa-edit"></i> Edit
+				</button>
+				<button class="border-0 bg-transparent text-danger" id="deleteRelease_${id}">
+					<i class="fa fa-trash"></i> Delete
+				</button>
+			</td>
+		</tr>
+	</script>
+	<script id="releaseRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_AUTOMATION_MANAGER','ROLE_TEST_LEAD','ROLE_TESTER')">
+		<tr>
+			<td>${identifier}</td>
+			<td>${name}</td>
+			<td>
+				<i class="fa-solid fa-ban"></i> N/A
+			</td>
+		</tr>
+	</script>
+	<script id="releaseRecordListPlaceholder" type="text/template">
+		<tr class="placeholder-glow">
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+		</tr>
+	</script>
+</head>
+
+<body>
+	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Release Records')}"></nav>
+
+	<div th:replace="~{BasePage :: sidebar}"></div>
+
+	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Delete Application Configuration Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="deleteReleaseDeleteForm">
+						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
+						Confirm delete operation <span id="usernameDisplay"></span>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="confirmDeleteReleaseRecord" type="submit" class="btn btn-danger">Confirm Delete</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade modal-lg" id="addOrEditReleaseRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Release Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="saveReleaseForm" autocomplete="off">
+						<input type="hidden" class="form-control" id="id" name="id" required />
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="identifier" name="identifier" required />
+							<label for="name">Release ID</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="name" name="name" required />
+							<label for="name">Release Name</label>
+						</div>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="saveRelease" type="submit" class="btn btn-primary">Save changes</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="p-3" id="releaseContent">
+		<button class="btn btn-sm btn-primary" id="addReleaseRecordButton" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')">
+			<i class="fa fa-plus"></i> Add Release Record
+		</button>
+		<br>
+		<br>
+		<table class="table table-striped" id="releaseRecordTable">
+			<caption>Release Records</caption>
+			<thead>
+				<tr>
+					<th>ID</th>
+					<th>Name</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="releaseRecordTableBody">
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>

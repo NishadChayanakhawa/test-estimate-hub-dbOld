@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/record/changeProcessing.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script th:src="@{/jquery/js/jquery-ui.min.js}"></script>
+	<link th:href="@{/jquery/css/jquery-ui.min.css}" rel="stylesheet" />
+	<script>
+		$(document).ready(function () {
+			changeProcessing.init();
+		});
+	</script>
+	<script id="requirementFormTemplate" type="text/template">
+		<tr id="requirementForm_${id}">
+			<input type="hidden" class="form-control" id="id_${id}" name="id">
+			<td><input type="text" class="form-control" id="identifier_${id}" name="identifier" placeholder="ID"
+					required></td>
+			<td><input type="text" class="form-control" id="description_${id}" name="description"
+					placeholder="Description" required></td>
+			<td>
+				<select class="form-select" id="complexityCode_${id}" name="complexityCode">
+					<option value="VERY_LOW">Very Low</option>
+					<option value="LOW">Low</option>
+					<option value="MEDIUM">Medium</option>
+					<option value="HIGH">High</option>
+					<option value="VERY_HIGH">Very High</option>
+				</select>
+			</td>
+			<td>
+				<button class="btn btn-sm btn-body text-danger" id="deleteRequirement_${id}">
+					<i class="fa fa-trash"></i>
+				</button>
+			</td>
+		</tr>
+	</script>
+	<script id="changeRecordListTemplate" type="text/template"
+		sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER','ROLE_TEST_LEAD')">
+		<tr>
+			<td>${releaseIdentifier}</td>
+			<td>${identifier}</td>
+			<td>${changeTypeName}</td>
+			<td>${name}</td>
+			<td>${statusDisplayValue}</td>
+			<td>
+				<button class="border-0 bg-transparent" id="editChange_${id}">
+					<i class="fa fa-edit"></i> Edit
+				</button>
+				<button class="border-0 bg-transparent text-danger" id="deleteChange_${id}">
+					<i class="fa fa-trash"></i> Delete
+				</button>
+				{%if statusCode=='CREATED'%}
+				<a class="link-primary-emphasis link-underline link-underline-opacity-0" id="estimate_${id}" th:href="@{/estimation/estimate/${id}}">
+					<i class="fa-solid fa-scale-balanced"></i> Estimate
+				</a>
+				{%else statusCode=='ESTIMATED'%}
+				<a class="link-primary-emphasis link-underline link-underline-opacity-0" id="estimate_${id}" th:href="@{/estimation/estimate/${id}}">
+					<i class="fa-solid fa-scale-balanced"></i> Review Estimate
+				</a>
+				{%/if%}
+			</td>
+		</tr>
+	</script>
+	<script id="changeRecordListTemplate" type="text/template"
+		sec:authorize="hasRole('ROLE_TESTER')">
+		<tr>
+			<td>${releaseIdentifier}</td>
+			<td>${identifier}</td>
+			<td>${changeTypeName}</td>
+			<td>${name}</td>
+			<td>${statusDisplayValue}</td>
+			<td>
+				<button class="border-0 bg-transparent text-primary-emphasis" id="estimate_${id}">
+					<i class="fa-solid fa-scale-balanced"></i> Estimate
+				</button>
+			</td>
+		</tr>
+	</script>
+	<script id="changeRecordListTemplate" type="text/template"
+		sec:authorize="hasRole('ROLE_AUTOMATION_MANAGER')">
+		<tr>
+			<td>${releaseIdentifier}</td>
+			<td>${identifier}</td>
+			<td>${changeTypeName}</td>
+			<td>${name}</td>
+			<td>${statusDisplayValue}</td>
+			<td>
+				
+			</td>
+		</tr>
+	</script>
+	
+	<script id="changeRecordListPlaceholder" type="text/template">
+		<tr class="placeholder-glow">
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+		</tr>
+	</script>
+</head>
+
+<body>
+	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Changes')}"></nav>
+
+	<div th:replace="~{BasePage :: sidebar}"></div>
+
+	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Delete Application Configuration Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="deleteChangeDeleteForm">
+						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
+						Confirm delete operation <span id="usernameDisplay"></span>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="confirmDeleteChangeRecord" type="submit" class="btn btn-danger">Confirm
+							Delete</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="addOrEditChangeRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Change Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="saveChangeForm" autocomplete="off">
+						<div class="row mb-3">
+							<input type="hidden" class="form-control" id="id" name="id" required />
+							<input type="hidden" class="form-control" id="status" name="statusCode" required />
+							
+							<div class="col-4">
+								<label class="form-label" for="releaseId">Release</label>
+								<select class="form-select" id="releaseId" name="releaseId">
+									<th:block th:each="release : ${releases}">
+									<option th:value="${release.id}" th:text="${release.identifier}" th:selected="${release.id == 1}">July 2023</option>
+									</th:block>
+								</select>
+							</div>
+							<div class="col-8">
+
+							</div>
+							<div class="col-4">
+								<label class="form-label" for="changeIdentifier">Change ID</label>
+								<input type="text" class="form-control" id="changeIdentifier" name="identifier" required>
+							</div>
+							<div class="col-8">
+								<label class="form-label" for="changeName">Change Name</label>
+								<input type="text" class="form-control" id="changeName" name="name" required>
+							</div>
+							<div class="col-4">
+								<label class="form-label" for="changeTypeId">Change Type</label>
+								<select class="form-select" id="changeTypeId" name="changeTypeId">
+									<th:block th:each="changeType : ${changeTypes}">
+									<option th:value="${changeType.id}" th:text="${changeType.name}" th:selected="${changeType.id == 1}">Significant Change</option>
+									</th:block>
+								</select>
+							</div>
+							<div class="col-4">
+								<label class="form-label" for="startDate">Planned Start Date</label>
+								<input type="text" class="form-control constraint-date" id="startDate" name="startDate"
+									required readOnly>
+							</div>
+							<div class="col-4">
+								<label class="form-label" for="endDate">Planned End Date</label>
+								<input type="text" class="form-control constraint-date" id="endDate" name="endDate"
+									required readOnly>
+							</div>
+							<button type="submit" class="visually-hidden"></button>
+					</form>
+					<table class="table table-striped table-sm caption-top p-4" id="requirementsFormTable">
+						<caption>Requirements</caption>
+						<thead>
+							<tr>
+								<th style="width:10%;">Change ID</th>
+								<th style="width:60%;">Decription</th>
+								<th style="width:20%;">Complexity</th>
+								<th style="width:10%;"></th>
+							</tr>
+						</thead>
+						<tbody id="requirementFormsTableBody">
+							<tr id="requirementForm_1">
+									<input type="hidden" class="form-control" id="id_${id}" name="id">
+									<td><input type="text" class="form-control" id="identifier_1" name="identifier" placeholder="ID"
+											required></td>
+									<td><input type="text" class="form-control" id="description_1" name="description"
+											placeholder="Description" required></td>
+									<td>
+										<select class="form-select" id="complexityCode_1" name="complexityCode">
+											<option value="VERY_LOW">Very Low</option>
+											<option value="LOW">Low</option>
+											<option value="MEDIUM">Medium</option>
+											<option value="HIGH">High</option>
+											<option value="VERY_HIGH">Very High</option>
+										</select>
+									</td>
+									<td>
+										<button type="submit" class="visually-hidden"></button>
+									</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<tr>
+								<td colspan="4">
+									<button class="btn btn-sm btn-body text-success" id="addRequirementButton">
+										<i class="fa fa-plus"></i> Add Requirement
+									</button>
+								</td>
+							</tr>
+						</tfoot>
+					</table>
+					
+				</div>
+
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button id="saveChange" type="submit" class="btn btn-primary">Save changes</button>
+
+			</div>
+		</div>
+	</div>
+	</div>
+	</div>
+
+	<div class="p-3" id="changeContent">
+		<button class="btn btn-sm btn-primary" id="addChangeRecordButton"
+			sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER','ROLE_TEST_LEAD')">
+			<i class="fa fa-plus"></i> Add Change Record
+		</button>
+		<br>
+		<br>
+		<table class="table table-striped" id="changeRecordTable">
+			<caption>Change Records</caption>
+			<thead>
+				<tr>
+					<th>Release ID</th>
+					<th>Change ID</th>
+					<th>Change Type</th>
+					<th>Name</th>
+					<th>Status</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="changeRecordTableBody">
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>

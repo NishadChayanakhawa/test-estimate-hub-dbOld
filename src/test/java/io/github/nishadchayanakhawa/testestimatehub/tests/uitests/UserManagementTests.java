@@ -1,0 +1,124 @@
+package io.github.nishadchayanakhawa.testestimatehub.tests.uitests;
+
+import org.assertj.core.api.Assertions;
+import org.testng.annotations.Test;
+
+import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.LoginPage;
+import io.nishadc.automationtestingframework.testngcustomization.TestFactory;
+import io.github.nishadchayanakhawa.testestimatehub.model.dto.UserDTO;
+import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.UserManagementPage;
+
+public class UserManagementTests {
+	@Test
+	public void addUser() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+
+		UserDTO user=new UserDTO();
+		user.setUsername("johnd");
+		user.setPassword("johnd");
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setEmail("john.d@company.com");
+		
+		TestFactory.recordTest("Add user", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().addUser(user);
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("User 'johnd' saved successfully");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+	
+	@Test(dependsOnMethods= {"addUser"})
+	public void addUser_duplicateUsername() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+
+		UserDTO user=new UserDTO();
+		user.setUsername("johnd");
+		user.setPassword("johnd");
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setEmail("john.d1@company.com");
+		
+		TestFactory.recordTest("Add user with duplicate username", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().addUser(user);
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("username 'johnd' already exists for another User");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+	
+	@Test(dependsOnMethods= {"addUser"})
+	public void addUser_duplicateEmail() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+
+		UserDTO user=new UserDTO();
+		user.setUsername("johnd1");
+		user.setPassword("johnd");
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setEmail("john.d@company.com");
+		
+		TestFactory.recordTest("Add user with duplicate email", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().addUser(user);
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("email 'john.d@company.com' already exists for another User");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+	
+	@Test(dependsOnMethods= {"addUser"})
+	public void editUser_withPassword() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+
+		UserDTO user=new UserDTO();
+		user.setUsername("johnd");
+		user.setPassword("new-password");
+		user.setFirstName("Mr. John");
+		user.setLastName("Doe");
+		user.setEmail("john.d@company.com");
+		
+		TestFactory.recordTest("Edit user with password change", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().editUser(user);
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("User 'johnd' saved successfully");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+	
+	@Test(dependsOnMethods= {"editUser_withPassword"})
+	public void editUser_withoutPassword() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+
+		UserDTO user=new UserDTO();
+		user.setUsername("johnd");
+		user.setPassword("");
+		user.setFirstName("John");
+		user.setLastName("Doe");
+		user.setEmail("john.d@company.com");
+		
+		TestFactory.recordTest("Edit user but no password change", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().editUser(user);
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("User 'johnd' saved successfully");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+	
+	@Test(dependsOnMethods= {"addUser_duplicateUsername","addUser_duplicateEmail","editUser_withoutPassword"})
+	public void deleteUser() {
+		LoginPage loginPage = LoginPage.getLoginPage();
+		
+		TestFactory.recordTest("Edit user with password change", loginPage.getDriver());
+		UserManagementPage userManagementPage=loginPage.login("admin", "admin").navigateToUserManagement().deleteUser("johnd");
+		
+		String actualToastMessage=userManagementPage.getToastMessage();
+		Assertions.assertThat(actualToastMessage).isEqualTo("User 'johnd' deleted successfully");
+		TestFactory.recordTestStep(actualToastMessage, true);
+		userManagementPage.logout();
+	}
+}
