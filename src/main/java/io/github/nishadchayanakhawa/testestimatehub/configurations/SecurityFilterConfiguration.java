@@ -24,13 +24,43 @@ import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 public class SecurityFilterConfiguration {
 	private static final String H2_CONSOLE_CONTEXT_MATCHER = "/h2-console/**";
 
+//	@Bean
+//	@Order(2)
+//	@Profile("!dev")
+//	SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
+//		return http.authorizeHttpRequests(
+//				request -> request.requestMatchers(AntPathRequestMatcher.antMatcher("/api/configuration/**"))
+//						.hasRole(Role.ADMIN.toString()).anyRequest().permitAll())
+//				.build();
+//	}
+
 	@Bean
 	@Order(2)
 	@Profile("!dev")
-	SecurityFilterChain applicationSecurityFilterChain(HttpSecurity http) throws Exception {
-		return http.authorizeHttpRequests(
-				request -> request.requestMatchers(AntPathRequestMatcher.antMatcher("/api/configuration/**"))
-						.hasRole(Role.ADMIN.toString()).anyRequest().permitAll())
+	SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+		return http
+				.authorizeHttpRequests(request -> request
+						.requestMatchers(AntPathRequestMatcher.antMatcher("/api/configuration/**"))
+							.hasRole(Role.ADMIN.toString())
+						.requestMatchers("/home")
+							.hasAnyRole(Role.ADMIN.toString(), Role.TESTER.toString(), Role.TEST_LEAD.toString(),Role.TEST_MANAGER.toString())
+						.requestMatchers("/configuration/**")
+							.hasAnyRole(Role.ADMIN.toString(), Role.TEST_MANAGER.toString())
+						.requestMatchers("/login")
+							.permitAll()
+						.requestMatchers("/bootstrap/**")
+							.permitAll()
+						.requestMatchers("/images/**")
+							.permitAll()
+						.requestMatchers("/fontawesome/**")
+							.permitAll()
+						.anyRequest()
+							.authenticated())
+				.formLogin(login -> login.loginPage("/login").permitAll().defaultSuccessUrl("/home", true)
+						.failureUrl("/login?error=true"))
+				.logout(logout -> logout.logoutSuccessUrl("/login?logout=true").invalidateHttpSession(true)
+						.deleteCookies("JSESSIONID"))
+				.csrf().and()
 				.build();
 	}
 

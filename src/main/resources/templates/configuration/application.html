@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />	
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/configuration/applicationConfigurationProcessing.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script>
+		$(document).ready(function () {
+			applicationConfigurationProcessing.init();
+		});
+	</script>
+	<script id="applicationConfigurationRecordListTemplate" type="text/template" sec:authorize="hasRole('ROLE_ADMIN')">
+		<tr>
+			<td>${applicationName}</td>
+			<td>${moduleName}</td>
+			<td>${subModuleName}</td>
+			<td>${baseTestCaseCountFactor}</td>
+			<td>
+				${complexityDisplayValue}
+			</td>
+			<td>
+				<button class="border-0 bg-transparent" id="editApplicationConfiguration_${id}">
+					<i class="fa fa-edit"></i> Edit
+				</button>
+				<button class="border-0 bg-transparent text-danger" id="deleteApplicationConfiguration_${id}">
+					<i class="fa fa-trash"></i> Delete
+				</button>
+			</td>
+		</tr>
+	</script>
+	<script id="applicationConfigurationRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
+		<tr>
+			<td>${applicationName}</td>
+			<td>${moduleName}</td>
+			<td>${subModuleName}</td>
+			<td>${baseTestCaseCountFactor}</td>
+			<td>
+				${complexityDisplayValue}
+			</td>
+			<td>
+				<i class="fa-solid fa-ban"></i> N/A
+			</td>
+		</tr>
+	</script>
+	<script id="applicationConfigurationRecordListPlaceholder" type="text/template">
+		<tr class="placeholder-glow">
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+		</tr>
+	</script>
+</head>
+
+<body>
+	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Application Configuration')}"></nav>
+
+	<div th:replace="~{BasePage :: sidebar}"></div>
+
+	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Delete Application Configuration Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="deleteApplicationConfigurationDeleteForm">
+						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
+						Confirm delete operation <span id="usernameDisplay"></span>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="confirmDeleteApplicationConfigurationRecord" type="submit" class="btn btn-danger">Confirm Delete</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade modal-lg" id="addOrEditApplicationConfigurationRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Application Configuration Record</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="saveApplicationConfigurationForm" autocomplete="off">
+						<input type="hidden" class="form-control" id="id" name="id" required />
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="application" name="applicationName" required />
+							<label for="applicationName">Application</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="module" name="moduleName" required />
+							<label for="applicationName">Module</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="subModule" name="subModuleName" required />
+							<label for="applicationName">Sub-Module</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control constraint-numeric" id="baseTestCaseCountFactor" name="baseTestCaseCountFactor" required />
+							<label for="applicationName">Base Test Case Count</label>
+						</div>
+						<label>Select Application Complexity</label>
+						<div class="btn-group" role="group" aria-label="Basic radio toggle button group">							
+							<input type="radio" class="btn-check" name="complexityCode" id="complexity_VERY_LOW" value="VERY_LOW"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="complexity_VERY_LOW">Very Low</label>
+							
+							<input type="radio" class="btn-check" name="complexityCode" id="complexity_LOW" value="LOW"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="complexity_LOW">Low</label>
+							
+							<input type="radio" class="btn-check" name="complexityCode" id="complexity_MEDIUM" value="MEDIUM"
+								autocomplete="off" checked>
+							<label class="btn btn-outline-primary" for="complexity_MEDIUM">Medium</label>
+
+							<input type="radio" class="btn-check" name="complexityCode" id="complexity_HIGH" value="HIGH"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="complexity_HIGH">High</label>
+
+							<input type="radio" class="btn-check" name="complexityCode" id="complexity_VERY_HIGH" value="VERY_HIGH"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="complexity_VERY_HIGH">Very High</label>
+						</div>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="saveApplicationConfiguration" type="submit" class="btn btn-primary">Save changes</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="p-3" id="applicationConfigurationContent">
+		<button class="btn btn-sm btn-primary" id="addApplicationConfigurationRecordButton" sec:authorize="hasRole('ROLE_ADMIN')">
+			<i class="fa fa-plus"></i> Add Application Configuration Record
+		</button>
+		<br>
+		<br>
+		<table class="table table-striped" id="applicationConfigurationRecordTable">
+			<caption>Application Configuration Records</caption>
+			<thead>
+				<tr>
+					<th>Application</th>
+					<th>Module</th>
+					<th>Sub-Module</th>
+					<th>Base Test Case Count</th>
+					<th>Complexity</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="applicationConfigurationRecordTableBody">
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>

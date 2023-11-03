@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/estimation/submitEstimation.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script th:src="@{/jquery/js/jquery-ui.min.js}"></script>
+	<link th:href="@{/jquery/css/jquery-ui.min.css}" rel="stylesheet" />
+	<script>
+		$(document).ready(function () {
+			submitEstimation.init();
+		});
+	</script>
+	
+	<script type="text/template" id="useCaseFormTemplate">
+		<div id="useCaseForm_${requirementId}_${id}" autocomplete="off" class="border-bottom border-secondary rounded-end pt-2">
+			<input type="hidden" id="useCaseChangeID_${requirementId}_${id}" name="changeId" value="${changeId}" required>
+			<input type="hidden" id="useCaseID_${requirementId}_${id}" name="requirementId" value="${requirementId}" required>																													
+			<input type="hidden" id="useCaseID_${requirementId}_${id}" name="id" required>
+			<div class="form-floating mb-3">
+				<input type="text" class="form-control" id="useCaseDescription_${requirementId}_${id}" name="description" required />
+				<label for="description">Use Case Description</label>
+			</div>
+			<div class="row mb-3">
+				<input type="hidden" id="appConfigurationId_${requirementId}_${id}" name="applicationConfigurationId" />
+				<div class="col-3">
+					<label class="form-label" for="useCaseApplication_${requirementId}_${id}">Application</label>
+					<select class="form-select" id="useCaseApplication_${requirementId}_${id}" required>
+						<option value="App1">Application 1</option>
+						<option value="App2">Application 2</option>
+						<option value="App3">Application 3</option>
+					</select>
+				</div>
+				<div class="col-3">
+					<label class="form-label" for="useCaseModule_${requirementId}_${id}">Module</label>
+					<select class="form-select" id="useCaseModule_${requirementId}_${id}" required disabled>
+	
+					</select>
+				</div>
+				<div class="col-3">
+					<label class="form-label" for="useCaseSubModule_${requirementId}_${id}">Sub-Module</label>
+					<select class="form-select" id="useCaseSubModule_${requirementId}_${id}" required disabled>
+	
+					</select>
+				</div>
+				<div class="col-3">
+					<label class="form-label" for="useCaseDavaVariationCount_${requirementId}_${id}">Data Variation Count</label>
+					<input type="text" class="form-control constraint-numeric" id="useCaseDavaVariationCount_${requirementId}_${id}" name="dataVariationCount" required />
+				</div>
+			</div>
+			<label for="basic-url" class="form-label">Select complexity related to -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Test Data</span>
+				<select class="form-select" id="testDataComplexityCode_${requirementId}_${id}" name="testDataComplexityCode">
+					<option value="VERY_LOW">Very Low</option>
+					<option value="LOW">Low</option>
+					<option value="MEDIUM">Medium</option>
+					<option value="HIGH">High</option>
+					<option value="VERY_HIGH">Very High</option>
+				</select>
+				<span class="input-group-text">Test Configuration</span>
+				<select class="form-select" id="testConfigurationComplexityCode_${requirementId}_${id}" name="testConfigurationComplexityCode">
+					<option value="VERY_LOW">Very Low</option>
+					<option value="LOW">Low</option>
+					<option value="MEDIUM">Medium</option>
+					<option value="HIGH">High</option>
+					<option value="VERY_HIGH">Very High</option>
+				</select>
+				<span class="input-group-text">Test Validation</span>
+				<select class="form-select" id="testValidationComplexityCode_${requirementId}_${id}" name="testValidationComplexityCode">
+					<option value="VERY_LOW">Very Low</option>
+					<option value="LOW">Low</option>
+					<option value="MEDIUM">Medium</option>
+					<option value="HIGH">High</option>
+					<option value="VERY_HIGH">Very High</option>
+				</select>
+			</div>
+			<div class="clearfix">
+				<button class="float-end btn btn-sm btn-body text-danger" id="deleteUseCaseButton_${requirementId}_${id}">
+					<i class="fa fa-trash"></i> Delete Use Case
+				</button>
+			</div>
+			<button type="submit" class="visually-hidden"></button>
+		</div>
+	</script>
+	<script id="appConfigurationOptionsTemplate" type="text/template">
+		<option value="${value}">${value}</option>
+	</script>
+</head>
+
+<body>
+	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Submit Estimation')}"></nav>
+
+	<div th:replace="~{BasePage :: sidebar}"></div>
+
+	<input type="hidden" class="form-control" id="id" name="id" th:value="${change.id}" required />
+
+	<div class="p-4">
+
+		<div>
+			<span class="text-body-secondary"
+				th:text="${change.releaseIdentifier + ' - ' + change.identifier}">Release</span><br>
+			<span class="h5" th:text="${change.name}">Release</span>
+			<span class="badge bg-primary" th:text="${change.changeTypeName}">Release</span>
+			<span class="badge bg-info" th:text="${change.startDate + ' to ' + change.endDate}">Release</span>
+		</div>
+		<hr>
+		<div class="accordion" id="requirementsAccordian">
+			<div th:each="requirement : ${change.requirements}" class="accordion-item">
+				<h2 class="accordion-header">
+					<button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+						th:data-bs-target="${'#requirement_' + requirement.id}" aria-expanded="false" aria-controls="collapseOne"
+						th:text="${requirement.identifier + ' - ' + requirement.description}">
+						Accordion Item #1
+					</button>
+				</h2>
+				<div th:id="${'requirement_' + requirement.id}" class="accordion-collapse collapse bg-secondary-subtle rounded-end border"
+					data-bs-parent="#requirementsAccordian">
+					<input type="hidden" id="changeId" th:value="${change.id}" required>
+					<form id="useCaseForms" autocomplete="off">
+					<div class="accordion-body" th:id="${'useCaseForms_' + requirement.id}">
+						<input type="hidden" th:id="${'useCaseCount_' + requirement.id}" value="999" />
+						<th:block th:each="useCase,iStat :${requirement.useCases}">
+							<div th:id="${'useCaseForm_' + requirement.id + '_' + useCase.id}" class="border-bottom border-secondary rounded-end pt-2">
+								<input type="hidden" th:id="${'useCaseChangeID_' + requirement.id + '_' + useCase.id}" name="changeId" th:value="${change.id}" required>
+								<input type="hidden" th:id="${'useCaseID_' + requirement.id + '_' + useCase.id}" name="requirementId" th:value="${requirement.id}" required>																													
+								<input type="hidden" th:id="${'useCaseID_' + requirement.id + '_' + useCase.id}" name="id" th:value="${useCase.id}" required>
+								
+								<div class="form-floating mb-3">
+									<input type="text" class="form-control" th:id="${'useCaseDescription_' + requirement.id + '_' + useCase.id}" name="description" th:value="${useCase.description}" required />
+									<label for="description">Use Case Description</label>
+								</div>
+								<div class="row mb-3">
+									<input type="hidden" th:id="${'appConfigurationId_' + requirement.id + '_' + useCase.id}" name="applicationConfigurationId" th:value="${useCase.applicationConfigurationId}" />
+									<div class="col-3">
+										<label class="form-label" th:for="${'useCaseApplication_' + requirement.id + '_' + useCase.id}">Application</label>
+										<select class="form-select" th:id="${'useCaseApplication_' + requirement.id + '_' + useCase.id}" required>
+											<option value="App1">Application 1</option>
+											<option value="App2">Application 2</option>
+											<option value="App3">Application 3</option>
+										</select>
+									</div>
+									<div class="col-3">
+										<label class="form-label" th:for="${'useCaseModule_' + requirement.id + '_' + useCase.id}">Module</label>
+										<select class="form-select" th:id="${'useCaseModule_' + requirement.id + '_' + useCase.id}" required disabled>
+						
+										</select>
+									</div>
+									<div class="col-3">
+										<label class="form-label" th:for="${'useCaseSubModule_' + requirement.id + '_' + useCase.id}">Sub-Module</label>
+										<select class="form-select" th:id="${'useCaseSubModule_' + requirement.id + '_' + useCase.id}" required disabled>
+						
+										</select>
+									</div>
+									<div class="col-3">
+										<label class="form-label" th:for="${'useCaseDavaVariationCount_' + requirement.id + '_' + useCase.id}">Data Variation Count</label>
+										<input type="text" class="form-control constraint-numeric" th:id="${'useCaseDavaVariationCount_' + requirement.id + '_' + useCase.id}" name="dataVariationCount" th:value="${useCase.dataVariationCount}" required />
+									</div>
+								</div>
+								<label for="basic-url" class="form-label">Select complexity related to -</label>
+									<div class="input-group mb-3">
+										<span class="input-group-text">Test Data</span>
+										<select class="form-select" th:id="${'testDataComplexityCode_' + requirement.id + '_' + useCase.id}" name="testDataComplexityCode">
+											<option value="VERY_LOW" th:selected="${useCase.testDataComplexityCode == 'VERY_LOW'} ? 'selected'">Very Low</option>
+											<option value="LOW" th:selected="${useCase.testDataComplexityCode == 'LOW'} ? 'selected'">Low</option>
+											<option value="MEDIUM" th:selected="${useCase.testDataComplexityCode == 'MEDIUM'} ? 'selected'">Medium</option>
+											<option value="HIGH" th:selected="${useCase.testDataComplexityCode == 'HIGH'} ? 'selected'">High</option>
+											<option value="VERY_HIGH" th:selected="${useCase.testDataComplexityCode == 'VERY_HIGH'} ? 'selected'">Very High</option>
+										</select>
+										<span class="input-group-text">Test Configuration</span>
+										<select class="form-select" th:id="${'testConfigurationComplexityCode_' + requirement.id + '_' + useCase.id}" name="testConfigurationComplexityCode">
+											<option value="VERY_LOW" th:selected="${useCase.testConfigurationComplexityCode == 'VERY_LOW'} ? 'selected'">Very Low</option>
+											<option value="LOW" th:selected="${useCase.testConfigurationComplexityCode == 'LOW'} ? 'selected'">Low</option>
+											<option value="MEDIUM" th:selected="${useCase.testConfigurationComplexityCode == 'MEDIUM'} ? 'selected'">Medium</option>
+											<option value="HIGH" th:selected="${useCase.testConfigurationComplexityCode == 'HIGH'} ? 'selected'">High</option>
+											<option value="VERY_HIGH" th:selected="${useCase.testConfigurationComplexityCode == 'VERY_HIGH'} ? 'selected'">Very High</option>
+										</select>
+										<span class="input-group-text">Test Validation</span>
+										<select class="form-select" th:id="${'testValidationComplexityCode_' + requirement.id + '_' + useCase.id}" name="testValidationComplexityCode">
+											<option value="VERY_LOW" th:selected="${useCase.testValidationComplexityCode == 'VERY_LOW'} ? 'selected'">Very Low</option>
+											<option value="LOW" th:selected="${useCase.testValidationComplexityCode == 'LOW'} ? 'selected'">Low</option>
+											<option value="MEDIUM" th:selected="${useCase.testValidationComplexityCode == 'MEDIUM'} ? 'selected'">Medium</option>
+											<option value="HIGH" th:selected="${useCase.testValidationComplexityCode == 'HIGH'} ? 'selected'">High</option>
+											<option value="VERY_HIGH" th:selected="${useCase.testValidationComplexityCode == 'VERY_HIGH'} ? 'selected'">Very High</option>
+										</select>
+									</div>
+									<div class="clearfix">
+										<th:block th:unless="${iStat.index == 0}">
+											<button class="float-end btn btn-sm btn-body text-danger" th:id="${'deleteUseCaseButton_' + requirement.id + '_' + useCase.id}">
+												<i class="fa fa-trash"></i> Delete Use Case
+											</button>
+										</th>
+									</div>
+									<button type="submit" class="visually-hidden"></button>
+							</div>
+						</th:block>
+					</div>
+					</form>
+					<button class="btn btn-sm btn-body text-success" th:id="${'addUseCaseButton_' + requirement.id}">
+						<i class="fa fa-plus"></i> Add Use Case
+					</button>
+				</div>
+			</div>
+		</div>
+		<hr>
+		<button id="saveChange" type="submit" class="btn btn-primary">Save</button>
+		<th:block th:switch="${change.statusCode}">
+		<button th:case="'CREATED'" id="submitForReview" type="submit" class="btn btn-primary">Submit For Review</button>
+		<button th:case="'ESTIMATED'" id="finalizeEstimates" type="submit" class="btn btn-primary">Finalize Estimates</button>
+		</th:block>
+	</div>
+
+	
+
+</body>
+
+</html>

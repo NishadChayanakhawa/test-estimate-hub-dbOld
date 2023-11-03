@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub - Login</title>
+	<script>
+		$(document).ready(function () {
+			console.debug("Works!!!");
+		});
+	</script>
+	<style>
+		html,
+		body {
+			height: 100%;
+		}
+
+		body {
+			display: -ms-flexbox;
+			display: -webkit-box;
+			display: flex;
+			-ms-flex-align: center;
+			-ms-flex-pack: center;
+			-webkit-box-align: center;
+			align-items: center;
+			-webkit-box-pack: center;
+			justify-content: center;
+			padding-top: 40px;
+			padding-bottom: 40px;
+			background-color: #f5f5f5;
+		}
+
+		.form-signin {
+			width: 100%;
+			max-width: 330px;
+			padding: 15px;
+			margin: 0 auto;
+		}
+
+		.form-signin .checkbox {
+			font-weight: 400;
+		}
+
+		.form-signin .form-control {
+			position: relative;
+			box-sizing: border-box;
+			height: auto;
+			padding: 10px;
+			font-size: 16px;
+		}
+
+		.form-signin .form-control:focus {
+			z-index: 2;
+		}
+
+		.form-signin input[type="text"] {
+			margin-bottom: -1px;
+			border-bottom-right-radius: 0;
+			border-bottom-left-radius: 0;
+		}
+
+		.form-signin input[type="password"] {
+			margin-bottom: 10px;
+			border-top-left-radius: 0;
+			border-top-right-radius: 0;
+		}
+	</style>
+</head>
+
+<body class="text-center">
+	<form class="input-form" th:action="@{/login}" method="POST" autocomplete="off">
+		<img class="mb-4" th:src="@{/images/logo_bg.png}" alt="">
+		<div class="input-group p-1">
+			<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
+			<input type="text" id="username" name="username" class="form-control" required autofocus>
+		</div>
+		<div class="input-group p-1">
+			<span class="input-group-text"><i class="fa-solid fa-key"></i></span>
+			<input type="password" id="password" name="password" class="form-control" required autofocus>
+		</div>
+		<button class="w-100 btn btn-md btn-primary" type="submit">Sign in</button>
+		<p><small>v1.0.0</small></p>
+	</form>
+</body>
+
+</html>

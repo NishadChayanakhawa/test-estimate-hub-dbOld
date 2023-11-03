@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/configuration/generalConfigurationProcessing.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script sec:authorize="hasRole('ROLE_ADMIN')">
+		$(document).ready(function () {
+			generalConfigurationProcessing.init();
+		});
+	</script>
+	<script sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
+		$(document).ready(function () {
+			generalConfigurationProcessing.init();
+			$("input").attr("readOnly",true);
+		});
+	</script>
+
+</head>
+
+<body>
+	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='General Configuration')}"></nav>
+
+	<div th:replace="~{BasePage :: sidebar}"></div>
+
+	<form id="generalConfigurationForm" autocomplete="off" class="p-4">
+		<input name="id" type="hidden" th:value="${generalConfiguration.id}">
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Test Case Preparation Productivity</strong> for Test Cases with -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Very Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCasePreparationProductivityForVeryLowComplexity" th:value="${generalConfiguration.testCasePreparationProductivityForVeryLowComplexity}">
+				<span class="input-group-text">Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCasePreparationProductivityForLowComplexity" th:value="${generalConfiguration.testCasePreparationProductivityForLowComplexity}">
+				<span class="input-group-text">Medium Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCasePreparationProductivityForMediumComplexity" th:value="${generalConfiguration.testCasePreparationProductivityForMediumComplexity}">
+				<span class="input-group-text">High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCasePreparationProductivityForHighComplexity" th:value="${generalConfiguration.testCasePreparationProductivityForHighComplexity}">
+				<span class="input-group-text">Very High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCasePreparationProductivityForVeryHighHighComplexity" th:value="${generalConfiguration.testCasePreparationProductivityForVeryHighHighComplexity}">
+			</div>
+		</div>
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Test Case Execution Productivity</strong> for Test Cases with -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Very Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCaseExecutionProductivityForVeryLowComplexity" th:value="${generalConfiguration.testCaseExecutionProductivityForVeryLowComplexity}">
+				<span class="input-group-text">Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCaseExecutionProductivityForLowComplexity" th:value="${generalConfiguration.testCaseExecutionProductivityForLowComplexity}">
+				<span class="input-group-text">Medium Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCaseExecutionProductivityForMediumComplexity" th:value="${generalConfiguration.testCaseExecutionProductivityForMediumComplexity}">
+				<span class="input-group-text">High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCaseExecutionProductivityForHighComplexity" th:value="${generalConfiguration.testCaseExecutionProductivityForHighComplexity}">
+				<span class="input-group-text">Very High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="testCaseExecutionProductivityForVeryHighHighComplexity" th:value="${generalConfiguration.testCaseExecutionProductivityForVeryHighHighComplexity}">
+			</div>
+		</div>
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Automation New Design Productivity</strong> for Test Cases with -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Very Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationNewDesignProductivityForVeryLowComplexity" th:value="${generalConfiguration.automationNewDesignProductivityForVeryLowComplexity}">
+				<span class="input-group-text">Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationNewDesignProductivityForLowComplexity" th:value="${generalConfiguration.automationNewDesignProductivityForLowComplexity}">
+				<span class="input-group-text">Medium Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationNewDesignProductivityForMediumComplexity" th:value="${generalConfiguration.automationNewDesignProductivityForMediumComplexity}">
+				<span class="input-group-text">High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationNewDesignProductivityForHighComplexity" th:value="${generalConfiguration.automationNewDesignProductivityForHighComplexity}">
+				<span class="input-group-text">Very High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationNewDesignProductivityForVeryHighHighComplexity" th:value="${generalConfiguration.automationNewDesignProductivityForVeryHighHighComplexity}">
+			</div>
+		</div>
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Automation Maintenance Productivity</strong> for Test Cases with -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Very Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationMaintenanceProductivityForVeryLowComplexity" th:value="${generalConfiguration.automationMaintenanceProductivityForVeryLowComplexity}">
+				<span class="input-group-text">Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationMaintenanceProductivityForLowComplexity" th:value="${generalConfiguration.automationMaintenanceProductivityForLowComplexity}">
+				<span class="input-group-text">Medium Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationMaintenanceProductivityForMediumComplexity" th:value="${generalConfiguration.automationMaintenanceProductivityForMediumComplexity}">
+				<span class="input-group-text">High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationMaintenanceProductivityForHighComplexity" th:value="${generalConfiguration.automationMaintenanceProductivityForHighComplexity}">
+				<span class="input-group-text">Very High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="automationMaintenanceProductivityForVeryHighHighComplexity" th:value="${generalConfiguration.automationMaintenanceProductivityForVeryHighHighComplexity}">
+			</div>
+		</div>
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Requirement modifier %</strong> for requirements with -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Very Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="requirementModifierPercentageForVeryLowComplexity" th:value="${generalConfiguration.requirementModifierPercentageForVeryLowComplexity}">
+				<span class="input-group-text">Low Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="requirementModifierPercentageForLowComplexity" th:value="${generalConfiguration.requirementModifierPercentageForLowComplexity}">
+				<span class="input-group-text">Medium Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="requirementModifierPercentageForMediumComplexity" th:value="${generalConfiguration.requirementModifierPercentageForMediumComplexity}">
+				<span class="input-group-text">High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="requirementModifierPercentageForHighComplexity" th:value="${generalConfiguration.requirementModifierPercentageForHighComplexity}">
+				<span class="input-group-text">Very High Complexity</span>
+				<input type="text" class="form-control constraint-numeric" name="requirementModifierPercentageForVeryHighHighComplexity" th:value="${generalConfiguration.requirementModifierPercentageForVeryHighHighComplexity}">
+			</div>
+		</div>
+		<div class="mb-3">
+			<label for="basic-url" class="form-label"><strong>Complexity Weightage %</strong> for -</label>
+			<div class="input-group mb-3">
+				<span class="input-group-text">Test Data Preparation</span>
+				<input type="text" class="form-control constraint-numeric" name="complexityWeightagePercentageForTestDataPreparation" th:value="${generalConfiguration.complexityWeightagePercentageForTestDataPreparation}">
+				<span class="input-group-text">Test Configuration</span>
+				<input type="text" class="form-control constraint-numeric" name="complexityWeightagePercentageForTestConfiguration" th:value="${generalConfiguration.complexityWeightagePercentageForTestConfiguration}">
+				<span class="input-group-text">Test Validation</span>
+				<input type="text" class="form-control constraint-numeric" name="complexityWeightagePercentageForTestValidation" th:value="${generalConfiguration.complexityWeightagePercentageForTestValidation}">
+			</div>
+		</div>
+		<button sec:authorize="hasRole('ROLE_ADMIN')" id="saveGeneralConfigurationButton" type="submit" class="btn btn-primary">Save changes</button>
+	</form>
+
+</body>
+
+</html>

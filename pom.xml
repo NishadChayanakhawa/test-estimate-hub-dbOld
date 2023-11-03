@@ -21,7 +21,17 @@
 		<resources>
 			<resource>
 				<directory>src/main/resources</directory>
+				<includes>
+					<include>application.properties</include>
+				</includes>
 				<filtering>true</filtering>
+			</resource>
+			<resource>
+				<directory>src/main/resources</directory>
+				<excludes>
+					<exclude>application.properties</exclude>
+				</excludes>
+				<filtering>false</filtering>
 			</resource>
 		</resources>
 		<plugins>
@@ -45,10 +55,10 @@
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
 				<configuration>
-					<argLine>${surefireArgLine}</argLine>
+					<argLine>${failsafe.jacoco.args}</argLine>
 					<skip>${skipTests}</skip>
 					<suiteXmlFiles>
-						<suiteXmlFile>api-tests-testng.xml</suiteXmlFile>
+						<suiteXmlFile>${testng.suiteXmlFile.name}</suiteXmlFile>
 					</suiteXmlFiles>
 				</configuration>
 				<executions>
@@ -64,7 +74,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<jvmArguments>${argLine}</jvmArguments>
+					<jvmArguments>${failsafe.jacoco.args}</jvmArguments>
 				</configuration>
 				<executions>
 					<execution>
@@ -73,6 +83,9 @@
 						<goals>
 							<goal>start</goal>
 						</goals>
+						<configuration>
+							<skip>${skipCodeCoverageCheck}</skip>
+						</configuration>
 					</execution>
 					<execution>
 						<id>stop-spring-boot</id>
@@ -80,6 +93,9 @@
 						<goals>
 							<goal>stop</goal>
 						</goals>
+						<configuration>
+							<skip>${skipCodeCoverageCheck}</skip>
+						</configuration>
 					</execution>
 				</executions>
 			</plugin>
@@ -101,6 +117,9 @@
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
+						<configuration>
+							<propertyName>failsafe.jacoco.args</propertyName>
+						</configuration>
 					</execution>
 					<execution>
 						<id>default-report</id>
@@ -226,6 +245,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>io.github.nishadchayanakhawa</groupId>
+			<artifactId>web-ui</artifactId>
+			<version>2.0.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>io.rest-assured</groupId>
 			<artifactId>spring-mock-mvc</artifactId>
 			<scope>test</scope>
@@ -237,13 +262,26 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 		</dependency>
 		<!-- https://mvnrepository.com/artifact/io.cucumber/cucumber-testng -->
-			<dependency>
-				<groupId>io.cucumber</groupId>
-				<artifactId>cucumber-testng</artifactId>
-				<version>${cucumber.version}</version>
-				<scope>test</scope>
-			</dependency>
-
+		<dependency>
+			<groupId>io.cucumber</groupId>
+			<artifactId>cucumber-testng</artifactId>
+			<version>${cucumber.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/io.github.bonigarcia/webdrivermanager -->
+		<dependency>
+			<groupId>io.github.bonigarcia</groupId>
+			<artifactId>webdrivermanager</artifactId>
+			<version>${webdrivermanager.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents.client5</groupId>
+			<artifactId>httpclient5</artifactId>
+			<version>5.2.1</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<profiles>
@@ -259,6 +297,21 @@
 				<skipCodeCoverageCheck>false</skipCodeCoverageCheck>
 				<skipTests>false</skipTests>
 				<spring.profiles.active>dev</spring.profiles.active>
+				<testng.suiteXmlFile.name>api-tests-testng.xml</testng.suiteXmlFile.name>
+			</properties>
+		</profile>
+		<profile>
+			<id>qa</id>
+			<activation>
+				<property>
+					<name>qa</name>
+				</property>
+			</activation>
+			<properties>
+				<skipCodeCoverageCheck>false</skipCodeCoverageCheck>
+				<skipTests>false</skipTests>
+				<spring.profiles.active>qa</spring.profiles.active>
+				<testng.suiteXmlFile.name>ui-tests-testng.xml</testng.suiteXmlFile.name>
 			</properties>
 		</profile>
 		<profile>
@@ -281,9 +334,10 @@
 		<maven-compiler-plugin.target>17</maven-compiler-plugin.target>
 		<maven-compiler-plugin.encoding>UTF-8</maven-compiler-plugin.encoding>
 		<cucumber.version>7.12.0</cucumber.version>
+		<webdrivermanager.version>5.6.0</webdrivermanager.version>
 		<jacoco-instruction-coveredratio.minimum>0.8</jacoco-instruction-coveredratio.minimum>
 		<jacoco-branch-coveredratio.minimum>0.8</jacoco-branch-coveredratio.minimum>
-		<jacoco-maven-plugin.version>0.8.9</jacoco-maven-plugin.version>
+		<jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
 		<sonar.cpd.exclusions>
 			**/io/github/nishadchayanakhawa/testestimatehub/model/**,
 			**/io/github/nishadchayanakhawa/testestimatehub/model/dto/**

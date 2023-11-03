@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/common/logging.js}"></script>
+	<script th:src="@{/application/js/configuration/userManagementProcessing.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script>
+		$(document).ready(function () {
+			userManagementProcessing.init();
+		});
+	</script>
+	<script id="userListTemplate" type="text/template" sec:authorize="hasRole('ROLE_ADMIN')">
+		<tr>
+			<td id="usernameDisplayValue_${id}">${username}</td>
+			<td>${firstName}</td>
+			<td>${lastName}</td>
+			<td>${email}</td>
+			<td>
+				<button class="border-0 bg-transparent" id="editUser_${id}">
+					<i class="fa fa-edit"></i> Edit
+				</button>
+				<button class="border-0 bg-transparent text-danger" id="deleteUser_${id}">
+					<i class="fa fa-trash"></i> Delete
+				</button>
+			</td>
+		</tr>
+	</script>
+	<script id="userListTemplate" type="text/template"
+		sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
+		<tr>
+			<td>${username}</td>
+			<td>${firstName}</td>
+			<td>${lastName}</td>
+			<td>${email}</td>
+			<td>
+				<i class="fa-solid fa-ban"></i> N/A
+			</td>
+		</tr>
+	</script>
+	<script id="userListPlaceholder" type="text/template">
+		<tr class="placeholder-glow">
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+			<td><span class="placeholder col-6 bg-dark"></span></td>
+		</tr>
+	</script>
+</head>
+
+<body>
+	<input th:replace="~{BasePage :: csrfElement}" />
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='User Management')}"></nav>
+
+	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Delete User</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="deleteUserForm">
+						<input type="hidden" id="delete_id" name="id" />
+						Confirm delete operation for user <span class="fw-bold text-danger" id="usernameDisplay"></span>
+						<hr>
+						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="confirmDeleteUser" type="submit" class="btn btn-danger">Confirm Delete</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+
+	<!-- Modal -->
+	<div class="modal fade modal-lg" id="putUserModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="exampleModalLabel">Add/Edit User</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<form id="addUserForm" autocomplete="off">
+						<input type="hidden" name="id" id="id" />
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="username" name="username" required />
+							<label for="username">Username</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="password" class="form-control" id="password" name="password" required />
+							<label for="password">Password</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="firstName" name="firstName" required />
+							<label for="firstName">First Name</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="lastName" name="lastName" required />
+							<label for="lastName">Last Name</label>
+						</div>
+						<div class="form-floating mb-3">
+							<input type="text" class="form-control" id="email" name="email" required />
+							<label for="email">Email</label>
+						</div>
+						<div class="btn-group" role="group" aria-label="role selection" req>
+							<input type="checkbox" class="btn-check" name="roles" id="roleADMIN" value="ADMIN"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="roleADMIN">Admin</label>
+
+							<input type="checkbox" class="btn-check" name="roles" id="roleTEST_MANAGER"
+								value="TEST_MANAGER" autocomplete="off">
+							<label class="btn btn-outline-primary" for="roleTEST_MANAGER">Test Manager</label>
+
+							<input type="checkbox" class="btn-check" name="roles" id="roleTEST_LEAD" value="TEST_LEAD"
+								autocomplete="off">
+							<label class="btn btn-outline-primary" for="roleTEST_LEAD">Test Lead</label>
+
+							<input type="checkbox" class="btn-check" name="roles" id="roleTESTER" value="TESTER"
+								autocomplete="off" checked disabled>
+							<label class="btn btn-outline-primary" for="roleTESTER">Tester</label>
+						</div>
+						<hr>
+						<button id="dismissPutUserModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="saveUser" type="submit" class="btn btn-primary">Save</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="p-3" id="userManagementContent">
+		<button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#putUserModal" id="addUserButton"
+			sec:authorize="hasRole('ROLE_ADMIN')">
+			<i class="fa fa-plus"></i> Add User
+		</button>
+		<br>
+		<br>
+		<table class="table table-striped" id="userListTable">
+			<caption>User List</caption>
+			<thead>
+				<tr>
+					<th>Username</th>
+					<th>First Name</th>
+					<th>Last Name</th>
+					<th>Email Address</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody id="userListTableBody">
+			</tbody>
+		</table>
+	</div>
+</body>
+
+</html>

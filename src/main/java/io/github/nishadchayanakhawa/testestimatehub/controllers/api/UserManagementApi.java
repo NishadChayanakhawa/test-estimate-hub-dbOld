@@ -96,6 +96,12 @@ public class UserManagementApi {
 		// return all users
 		logger.debug(TestEstimateHubConstants.SERVING_REQUEST_DEBUG_MESSAGE, "GET",
 				TestEstimateHubConstants.USER_MANAGEMENT_API);
+//		try {
+//			Thread.sleep(5000);
+//		} catch (InterruptedException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		return new ResponseEntity<>(this.userService.getAll(), HttpStatus.OK);
 	}
 
