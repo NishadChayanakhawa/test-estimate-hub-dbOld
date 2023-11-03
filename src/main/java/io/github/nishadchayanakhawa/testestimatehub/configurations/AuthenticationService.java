@@ -12,8 +12,12 @@ import io.github.nishadchayanakhawa.testestimatehub.repositories.UserRepository;
 @Service
 public class AuthenticationService implements UserDetailsService {
 
-	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	public AuthenticationService(UserRepository userRepository) {
+		this.userRepository=userRepository;
+	}
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

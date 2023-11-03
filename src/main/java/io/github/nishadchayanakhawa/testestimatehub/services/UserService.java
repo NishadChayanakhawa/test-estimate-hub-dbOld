@@ -38,16 +38,20 @@ public class UserService {
 	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
 	// user repository
-	@Autowired
 	private UserRepository userRepository;
 
 	// model mapper
-	@Autowired
 	private ModelMapper modelMapper;
 
 	// password encoder
-	@Autowired
 	private PasswordEncoder passwordEncoder;
+	
+	@Autowired
+	public UserService(UserRepository userRepository,ModelMapper modelMapper,PasswordEncoder passwordEncoder) {
+		this.userRepository=userRepository;
+		this.modelMapper=modelMapper;
+		this.passwordEncoder=passwordEncoder;
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
