@@ -1,8 +1,6 @@
 package io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages;
 
 import java.util.logging.Level;
-
-import org.openqa.selenium.Dimension;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -31,8 +29,6 @@ public class LoginPage extends BasePage {
 		options.addArguments("--headless=new");
 		options.addArguments("--remote-allow-origins=*");
 		WebDriver driver=WebDriverManager.chromedriver().capabilities(options).create();
-		//driver.manage().window().setSize(new Dimension(1920,1080));
-		//driver.manage().window().maximize();
 		driver.get("http://localhost:8999/login");
 		return new LoginPage(driver);
 	}
