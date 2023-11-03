@@ -28,11 +28,11 @@ public class LoginPage extends BasePage {
 	public static LoginPage getLoginPage() {
 		java.util.logging.Logger.getLogger("org.openqa.selenium").setLevel(Level.SEVERE);
 		ChromeOptions options = new ChromeOptions();
-		options.addArguments("--headless=new");
+		//options.addArguments("--headless=new");
 		options.addArguments("--remote-allow-origins=*");
 		WebDriver driver=WebDriverManager.chromedriver().capabilities(options).create();
-		driver.manage().window().setSize(new Dimension(1920,1080));
-		driver.manage().window().maximize();
+		//driver.manage().window().setSize(new Dimension(1920,1080));
+		//driver.manage().window().maximize();
 		driver.get("http://localhost:8999/login");
 		return new LoginPage(driver);
 	}
