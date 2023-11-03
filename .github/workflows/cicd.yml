@@ -24,6 +24,7 @@ jobs:
       run: mvn clean verify -Pdev
 
     - name: Archive test execution results
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: api-test-report
@@ -51,6 +52,7 @@ jobs:
       run: mvn clean verify -Pqa
 
     - name: Archive test execution results
+      if: always()
       uses: actions/upload-artifact@v3
       with:
         name: ui-test-report.html
