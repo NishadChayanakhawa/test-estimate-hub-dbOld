@@ -4,7 +4,7 @@ import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 
 @CucumberOptions(
-		features = "src/test/resources/Features/01_UserManagementApiTests.feature",
+		features = "src/test/resources/Features/02_TestTypeConfigurationApiTests.feature",
 		glue = "io.nishadc.automationtestingframework.testinginterface.restapi.stepdefinitions")
-public class UserManagementApiTests extends AbstractTestNGCucumberTests{
+public class TestTypeConfigurationApiTests extends AbstractTestNGCucumberTests{
 }

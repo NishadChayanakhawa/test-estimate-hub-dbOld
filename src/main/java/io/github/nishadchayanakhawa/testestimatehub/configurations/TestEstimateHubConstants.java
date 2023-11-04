@@ -7,6 +7,7 @@ public class TestEstimateHubConstants {
 	private static final String CONFIGURATION_API="/api/configuration";
 	
 	public static final String USER_MANAGEMENT_API=CONFIGURATION_API + "/user";
+	public static final String TEST_TYPE_CONFIGURATION_API=CONFIGURATION_API + "/testType";
 	public static final String APPLICATION_CONFIGURATION_API= CONFIGURATION_API + "/application";
 	
 	public static final String SERVING_REQUEST_DEBUG_MESSAGE="Serving {} request for {}";
