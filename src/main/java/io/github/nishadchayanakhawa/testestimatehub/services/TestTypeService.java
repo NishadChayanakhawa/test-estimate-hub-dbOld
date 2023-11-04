@@ -34,8 +34,13 @@ public class TestTypeService {
 	private static final Logger logger = LoggerFactory.getLogger(TestTypeService.class);
 
 	// test type repository
-	@Autowired
 	private TestTypeRepository testTypeRepository;
+	
+	//autowired constructor
+	@Autowired
+	public TestTypeService(TestTypeRepository testTypeRepository) {
+		this.testTypeRepository=testTypeRepository;
+	}
 
 	// model mapper
 	@Autowired

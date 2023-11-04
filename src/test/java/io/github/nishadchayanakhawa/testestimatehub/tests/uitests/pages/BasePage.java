@@ -4,8 +4,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
 import io.nishadc.automationtestingframework.testinginterface.webui.ApplicationActions;
 
 public class BasePage extends ApplicationActions {	
@@ -35,9 +33,7 @@ public class BasePage extends ApplicationActions {
 	
 	public void logout() {
 		this.clickNavbarTogglerIfAvailable();
-		this.driverWait.until(ExpectedConditions.visibilityOf(userLink));
 		this.clickElement(userLink);
-		this.driverWait.until(ExpectedConditions.visibilityOf(logoutButton));
 		this.clickElement(logoutButton);
 		this.driver.quit();
 	}
@@ -50,9 +46,7 @@ public class BasePage extends ApplicationActions {
 	
 	public UserManagementPage navigateToUserManagement() {
 		this.clickNavbarTogglerIfAvailable();
-		this.driverWait.until(ExpectedConditions.visibilityOf(configurationLink));
 		this.clickElement(configurationLink);
-		this.driverWait.until(ExpectedConditions.visibilityOf(userManagementOption));
 		this.clickElement(userManagementOption);
 		return new UserManagementPage(this.driver);
 	}

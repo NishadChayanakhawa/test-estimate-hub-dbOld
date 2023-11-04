@@ -52,7 +52,6 @@ public class UserManagementPage extends BasePage{
 	}
 	
 	private UserManagementPage saveUser(UserDTO user) {
-		this.driverWait.until(ExpectedConditions.visibilityOf(username));
 		this.clearValue(username);
 		this.sendText(username, user.getUsername());
 		this.clearValue(password);
@@ -87,7 +86,6 @@ public class UserManagementPage extends BasePage{
 	}
 	
 	public String getToastMessage() {
-		this.driverWait.until(ExpectedConditions.visibilityOf(visibleToastMessage));
 		String toastMessage=this.getInnerText(visibleToastMessage);
 		this.clickElement(closeToastMessage);
 		if(this.isDisplayed(dismissModalButton)) {
