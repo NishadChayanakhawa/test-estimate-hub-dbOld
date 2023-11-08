@@ -87,7 +87,7 @@
 							<goal>start</goal>
 						</goals>
 						<configuration>
-							<skip>${skipCodeCoverageCheck}</skip>
+							<skip>${skipTests}</skip>
 						</configuration>
 					</execution>
 					<execution>
@@ -97,7 +97,7 @@
 							<goal>stop</goal>
 						</goals>
 						<configuration>
-							<skip>${skipCodeCoverageCheck}</skip>
+							<skip>${skipTests}</skip>
 						</configuration>
 					</execution>
 				</executions>
