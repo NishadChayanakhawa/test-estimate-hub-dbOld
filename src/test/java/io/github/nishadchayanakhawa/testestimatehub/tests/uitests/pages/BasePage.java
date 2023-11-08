@@ -4,8 +4,6 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
-import org.openqa.selenium.support.ui.ExpectedConditions;
-
 import io.nishadc.automationtestingframework.testinginterface.webui.ApplicationActions;
 
 public class BasePage extends ApplicationActions {	
@@ -21,8 +19,20 @@ public class BasePage extends ApplicationActions {
 	@FindBy(xpath="//*[@id=\"userManagementOption\"]")
 	WebElement userManagementOption;
 	
+	@FindBy(xpath="//*[@id=\"testTypeConfigurationOption\"]")
+	WebElement testTypeConfigurationOption;
+	
 	@FindBy(xpath="//button[@class='navbar-toggler']")
 	WebElement navbarToggler;
+	
+	@FindBy(xpath="//*[@id=\"toast-container\"]/div/div[2]")
+	WebElement visibleToastMessage;
+	
+	@FindBy(xpath="//*[@id=\"toast-container\"]/div/button")
+	WebElement closeToastMessage;
+	
+	@FindBy(xpath="//button[@id='dismissModal']")
+	WebElement dismissModalButton;
 
 	public BasePage(WebDriver driver) {
 		super(driver);
@@ -35,9 +45,7 @@ public class BasePage extends ApplicationActions {
 	
 	public void logout() {
 		this.clickNavbarTogglerIfAvailable();
-		this.driverWait.until(ExpectedConditions.visibilityOf(userLink));
 		this.clickElement(userLink);
-		this.driverWait.until(ExpectedConditions.visibilityOf(logoutButton));
 		this.clickElement(logoutButton);
 		this.driver.quit();
 	}
@@ -50,10 +58,24 @@ public class BasePage extends ApplicationActions {
 	
 	public UserManagementPage navigateToUserManagement() {
 		this.clickNavbarTogglerIfAvailable();
-		this.driverWait.until(ExpectedConditions.visibilityOf(configurationLink));
 		this.clickElement(configurationLink);
-		this.driverWait.until(ExpectedConditions.visibilityOf(userManagementOption));
 		this.clickElement(userManagementOption);
 		return new UserManagementPage(this.driver);
+	}
+	
+	public TestTypeConfigurationPage navigateToTestTypeConfiguration() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(configurationLink);
+		this.clickElement(testTypeConfigurationOption);
+		return new TestTypeConfigurationPage(this.driver);
+	}
+	
+	public String getToastMessage() {
+		String toastMessage=this.getInnerText(visibleToastMessage);
+		this.clickElement(closeToastMessage);
+		if(this.isDisplayed(dismissModalButton)) {
+			this.clickElement(dismissModalButton);
+		}
+		return toastMessage;
 	}
 }

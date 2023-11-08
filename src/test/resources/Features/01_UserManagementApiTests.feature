@@ -71,3 +71,7 @@ Feature: User management tests
 		And In request body template, replace "\"${id}\"" with value of variable "addedUserId"
 		When DELETE request is submitted to "http://localhost:8999/api/configuration/user"
 		Then Response status code should be 200
+		
+	Scenario: Get non-existing user
+		When GET request is submitted to "http://localhost:8999/api/configuration/user/999"
+		Then Response status code should be 410

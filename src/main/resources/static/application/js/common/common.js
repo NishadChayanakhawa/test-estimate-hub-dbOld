@@ -94,7 +94,7 @@ $.fn.indicateTableLoading = function(columnCount) {
 	//
 	$("button").filter(":visible").filter(":enabled").each(function() {
 		$(this).addClass("temp-disabled");
-		$(this).attr('disabled',true);
+		$(this).attr('disabled', true);
 	});
 	$("a").filter(":visible").each(function() {
 		$(this).addClass("temp-disabled");
@@ -102,15 +102,55 @@ $.fn.indicateTableLoading = function(columnCount) {
 		$(this).addClass("disabled");
 		$(this).addClass("border-0");
 	});
-	
+	$(this).html("");
 	$(this).addClass("placeholder-glow");
-	$(this).append("<tr class='placeholder-row'>");
 	var paceholderRowToAppend = "<tr class='placeholder-row'>";
 	for (var iColumnCounter = 0; iColumnCounter < columnCount; iColumnCounter++) {
 		paceholderRowToAppend = paceholderRowToAppend + "<td><span class='placeholder col-12'></span></td>"
 	}
 	paceholderRowToAppend = paceholderRowToAppend + "</tr>"
 	$(this).append(paceholderRowToAppend);
+}
+
+$.fn.indicateButtonProcessing = function() {
+	//
+	$("button").filter(":visible").filter(":enabled").each(function() {
+		$(this).addClass("temp-disabled");
+		$(this).attr('disabled', true);
+	});
+	$("a").filter(":visible").each(function() {
+		$(this).addClass("temp-disabled");
+		$(this).addClass("btn");
+		$(this).addClass("disabled");
+		$(this).addClass("border-0");
+	});
+	logging.log($(this).prop('tagName'));
+	if($(this).prop('tagName')=='FORM') {
+		$(this).children("button[type='submit']").append("<span class='temp-spinner'> <i class='fa-solid fa-spinner fa-spin'></i></span>");		
+	} else {
+		$(this).append("<span class='temp-spinner'> <i class='fa-solid fa-spinner fa-spin'></i></span>");
+	}
+	
+}
+
+$.fn.indicateButtonProcessingCompleted = function() {
+	$("a.temp-disabled").each(function() {
+		$(this).removeClass("temp-disabled");
+		$(this).removeClass("btn");
+		$(this).removeClass("disabled");
+		$(this).removeClass("border-0");
+	});
+	$("button.temp-disabled").each(function() {
+		$(this).removeClass("temp-disabled");
+		$(this).attr('disabled', false);
+	});
+	logging.log($(this).prop('tagName'));
+	if($(this).prop('tagName')=='FORM') {
+		$(this).children("button[type='submit']").children("span.temp-spinner").remove();	
+	} else {
+		$(this).children("span.temp-spinner").remove();
+	}
+	$(this).children("button[type='submit']").children("span.temp-spinner").remove();
 }
 
 $.fn.indicateTableLoadingCompleted = function() {
@@ -122,19 +162,39 @@ $.fn.indicateTableLoadingCompleted = function() {
 	});
 	$("button.temp-disabled").each(function() {
 		$(this).removeClass("temp-disabled");
-		$(this).attr('disabled',false);
+		$(this).attr('disabled', false);
 	});
 	$(this).removeClass("placeholder-glow");
 	$(this).children("tr.placeholder-row").remove();
 }
 
-var processApiErrors=function(errorDetails) {
+var processApiErrors = function(errorDetails) {
 	$(".is-invalid").removeClass("is-invalid");
-	$.each(errorDetails,function(i,value) {
-		var elementId=value.split(" ")[0];
+	$.each(errorDetails, function(i, value) {
+		var elementId = value.split(" ")[0];
 		logging.log(i + ":" + value + ":" + elementId);
 		$("#" + elementId).addClass("is-invalid");
-		
+
 		toastr.error(value);
 	});
+};
+
+var updateEditForm = function(editModal, data, shouldShowModal) {
+	$.each(data, function(key, value) {
+		logging.log("Processing key " + key);
+		logging.log(editModal.children("input#" + key));
+		$("input#" + key).val(value);
+	});
+	if (shouldShowModal) {
+		editModal.modal('show');
+	}
+};
+
+var populateDataTable = function(data, tableXPath, tableBodyXPath, templateXPath) {
+	if ($.fn.DataTable.isDataTable(tableXPath)) {
+		$(tableXPath).DataTable().destroy();
+	}
+	$(tableBodyXPath).html("");
+	$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
+	$(tableXPath).DataTable();
 };

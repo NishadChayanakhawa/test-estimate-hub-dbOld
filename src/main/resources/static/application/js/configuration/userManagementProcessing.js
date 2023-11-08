@@ -6,26 +6,16 @@ var userManagementProcessing=(function() {
 	 */
 	var showEditModal=function(event) {
 		event.preventDefault();
+		$(this).indicateButtonProcessing();
 		logging.log("Showing edit modal");
 		var id=$(this).attr('id').split("_")[1];
 		logging.log("User id: " + id);
 		apiHandling.processRequest("get","/api/configuration/user/" + id,csrfToken)
-			.done(data => showEditModal_success(data))
-			.catch(error => showEditModal_failure(error));
+			.done(data => showEditModal_success(data,$(this)))
+			.catch(error => showEditModal_failure(error,$(this)));
 	};
 	
-	var updateEditForm=function(editModal,data,shouldShowModal) {
-		$.each(data,function(key,value) {
-			logging.log("Processing key " + key);
-			logging.log(editModal.children("input#" + key));
-			$("input#" + key).val(value);
-		});
-		if(shouldShowModal) {
-			editModal.modal('show');	
-		}
-	};
-	
-	var showEditModal_success=function(user) {
+	var showEditModal_success=function(user,editButton) {
 		logging.log(user);
 		updateEditForm($("#putUserModal"),user,false);
 		$.each(user.roles,function(index,role) {
@@ -33,12 +23,14 @@ var userManagementProcessing=(function() {
 			$("input#role" + role).attr("checked",true);
 		});
 		$("input#password").attr('required',false);
+		editButton.indicateButtonProcessingCompleted();
 		$("#putUserModal").modal('show');
 	}
 	
-	var showEditModal_failure=function(error) {
+	var showEditModal_failure=function(error,editButton) {
 		logging.log(error);
 		toastr.error(error.responseJSON.message);
+		editButton.indicateButtonProcessingCompleted();
 		getUserList();
 	}
 	
@@ -50,13 +42,6 @@ var userManagementProcessing=(function() {
 		logging.log("Dismissed modal");
 		$(".is-invalid").removeClass("is-invalid");
 		$("form#addUserForm").get(0).reset();
-		$.each($("input[name='roles']"),function(index,element) {
-			logging.log("Processing role element " + index + ":" + element);
-			if($(this).attr("id")!="roleTESTER") {
-				$(this).attr('checked',false);
-			}
-		});
-		$("input#password").attr('required',true);
 	};
 	
 	
@@ -76,6 +61,7 @@ var userManagementProcessing=(function() {
 	
 	var triggerDeleteTransaction=function(event) {
 		event.preventDefault();
+		$(this).indicateButtonProcessing();
 		logging.log("Triggering delete transaction for user");
 		var deleteUserRequest={
 			"id" : $("input#delete_id").val()
@@ -87,6 +73,7 @@ var userManagementProcessing=(function() {
 	
 	var triggerDeleteTransaction_success=function(data,username) {
 		logging.log(data);
+		$("button#confirmDeleteUser").indicateButtonProcessingCompleted();
 		$("div#deleteUserConfirmationModal").modal('hide');
 		toastr.success("User '" + username + "' deleted successfully");
 		getUserList();
@@ -94,6 +81,7 @@ var userManagementProcessing=(function() {
 	
 	var triggerDeleteTransaction_failure=function(error) {
 		logging.log(error);
+		$("button#confirmDeleteUser").indicateButtonProcessingCompleted();
 		toastr.error(error.responseJSON.path + ' ' + error.responseJSON.error);
 	};
 	
@@ -103,7 +91,7 @@ var userManagementProcessing=(function() {
 	var saveUser=function(event) {
 		event.preventDefault();
 		logging.log("Saving user");
-		
+		$(this).indicateButtonProcessing();
 		var saveUserRequest=$("form#addUserForm").serializeObject();
 		if(!$.isArray(saveUserRequest.roles)) {
 			var role=saveUserRequest.roles;
@@ -118,6 +106,7 @@ var userManagementProcessing=(function() {
 	
 	var saveUser_success=function(user) {
 		logging.log(user);
+		$("form#addUserForm").indicateButtonProcessingCompleted();
 		$("#putUserModal").modal('hide');
 		toastr.success("User '" + user.username + "' saved successfully");
 		getUserList();
@@ -125,6 +114,7 @@ var userManagementProcessing=(function() {
 	
 	var saveUser_failure=function(error) {
 		logging.log(error);
+		$("form#addUserForm").indicateButtonProcessingCompleted();
 		processApiErrors(error.responseJSON.details);
 	};
 	

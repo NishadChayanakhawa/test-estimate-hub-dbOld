@@ -19,4 +19,9 @@ public class TestEstimateHubApplicationControllers {
 	public String getUserManagementPage() {
 		return "configuration/userManagement";
 	}
+	
+	@GetMapping("/configuration/testType")
+	public String getTestTypeConfigurationPage() {
+		return "configuration/testType";
+	}
 }
