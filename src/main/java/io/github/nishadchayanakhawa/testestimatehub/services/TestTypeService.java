@@ -35,16 +35,16 @@ public class TestTypeService {
 
 	// test type repository
 	private TestTypeRepository testTypeRepository;
-	
-	//autowired constructor
-	@Autowired
-	public TestTypeService(TestTypeRepository testTypeRepository) {
-		this.testTypeRepository=testTypeRepository;
-	}
 
 	// model mapper
-	@Autowired
 	private ModelMapper modelMapper;
+
+	// autowired constructor
+	@Autowired
+	public TestTypeService(TestTypeRepository testTypeRepository, ModelMapper modelMapper) {
+		this.testTypeRepository = testTypeRepository;
+		this.modelMapper = modelMapper;
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
