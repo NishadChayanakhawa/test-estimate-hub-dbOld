@@ -1,125 +1,132 @@
 var testTypeConfigurationProcessing = (function() {
 	var csrfToken;
 	var xpaths = {
-		"testTypeConfigurationContent" : "div#testTypeConfigurationContent",
-		"addOrEditTestTypeConfigurationRecordModal" : "#addOrEditTestTypeConfigurationRecordModal",
-		"testTypeConfigurationRecordListPlaceholder" : "#testTypeConfigurationRecordListPlaceholder",
-		"saveTestTypeConfigurationButton" : "button#saveTestTypeConfiguration",
-		"saveTestTypeConfigurationForm" : "form#saveTestTypeConfigurationForm",
-		"testTypeConfigurationRecordTable" : "table#testTypeConfigurationRecordTable",
-		"testTypeConfigurationRecordTableBody" : "tbody#testTypeConfigurationRecordTableBody",
-		"testTypeConfigurationRecordListTemplate" : "#testTypeConfigurationRecordListTemplate",
-		"editTestTypeConfigurationButtons" : "button[id^='editTestTypeConfiguration_']",
-		"deleteTestTypeConfigurationButtons" : "button[id^='deleteTestTypeConfiguration_']",
-		"deleteUserConfirmationModal" : "div#deleteUserConfirmationModal",
-		"confirmDeleteTestTypeConfigurationRecordButton" : "button#confirmDeleteTestTypeConfigurationRecord",
-		"deleteTestTypeConfigurationDeleteForm" : "form#deleteTestTypeConfigurationDeleteForm"
+		"testTypeConfigurationContent": "div#testTypeConfigurationContent",
+		"addOrEditTestTypeConfigurationRecordModal": "#addOrEditTestTypeConfigurationRecordModal",
+		"testTypeConfigurationRecordListPlaceholder": "#testTypeConfigurationRecordListPlaceholder",
+		"saveTestTypeConfigurationButton": "button#saveTestTypeConfiguration",
+		"saveTestTypeConfigurationForm": "form#saveTestTypeConfigurationForm",
+		"testTypeConfigurationRecordTable": "table#testTypeConfigurationRecordTable",
+		"testTypeConfigurationRecordTableBody": "tbody#testTypeConfigurationRecordTableBody",
+		"testTypeConfigurationRecordListTemplate": "#testTypeConfigurationRecordListTemplate",
+		"editTestTypeConfigurationButtons": "button[id^='editTestTypeConfiguration_']",
+		"deleteTestTypeConfigurationButtons": "button[id^='deleteTestTypeConfiguration_']",
+		"deleteUserConfirmationModal": "div#deleteUserConfirmationModal",
+		"confirmDeleteTestTypeConfigurationRecordButton": "button#confirmDeleteTestTypeConfigurationRecord",
+		"deleteTestTypeConfigurationDeleteForm": "form#deleteTestTypeConfigurationDeleteForm"
 	};
 
 	//DELETE Process
-	
-	var showDeleteModal=function(event) {
+	var onModalDismiss=function() {
+		logging.log("Dismissed modal");
+		$(".is-invalid").removeClass("is-invalid");
+		$(xpaths["saveTestTypeConfigurationForm"])[0].reset();
+		$.each($("input[name='roles']"),function(index,element) {
+			logging.log("Processing role element " + index + ":" + element);
+			if($(this).attr("id")!="roleTESTER") {
+				$(this).attr('checked',false);
+			}
+		});
+		$("input#password").attr('required',true);
+	};
+
+	var showDeleteModal = function(event) {
 		event.preventDefault();
-		var deleteButtonId=$(this).attr("id");
-		var testTypeConfigurationId=deleteButtonId.split("_")[1];
+		var deleteButtonId = $(this).attr("id");
+		var testTypeConfigurationId = deleteButtonId.split("_")[1];
 		$("input#deleteAction_id").val(testTypeConfigurationId);
+		var username=$("td#testTypeDisplayName_" + testTypeConfigurationId).html();
+		logging.log(username);
+		$("span#testTypeNameDisplay").html(username);
 		$(xpaths["deleteUserConfirmationModal"]).modal("show");
 	};
-	
-	var deleteTestTypeConfigurationRecord=function(event) {
+
+	var deleteTestTypeConfigurationRecord = function(event) {
 		event.preventDefault();
-		$(xpaths["deleteUserConfirmationModal"]).modal("hide");
-		$(xpaths["testTypeConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Deleting record...</h5>' });
-		var testTypeConfigurationId=$(xpaths["deleteTestTypeConfigurationDeleteForm"]).serializeObject();
-		apiHandling.processRequest("delete", "/api/config/testType", csrfToken, testTypeConfigurationId)
-			.done(data => deleteTestTypeConfigurationRecord_success(data))
+		$(xpaths["deleteTestTypeConfigurationDeleteForm"]).indicateButtonProcessing();
+		var testTypeName=$("span#testTypeNameDisplay").html();
+		var testTypeConfigurationId = $(xpaths["deleteTestTypeConfigurationDeleteForm"]).serializeObject();
+		apiHandling.processRequest("delete", "/api/configuration/testType", csrfToken, testTypeConfigurationId)
+			.done(data => deleteTestTypeConfigurationRecord_success(data,testTypeName))
 			.catch(error => console.debug(error));
 	}
-	
-	var deleteTestTypeConfigurationRecord_success=function(data) {
-		$(xpaths["testTypeConfigurationContent"]).unblock();
+
+	var deleteTestTypeConfigurationRecord_success = function(data,testTypeName) {
+		logging.log(data);
+		$(xpaths["deleteTestTypeConfigurationDeleteForm"]).indicateButtonProcessingCompleted();
+		$(xpaths["deleteUserConfirmationModal"]).modal('hide');
+		toastr.success("Test type '" + testTypeName + "' deleted successfully");
 		getTestTypeConfigurationList();
 	};
-	
+
 	//Load List
-	
+
 	var getTestTypeConfigurationList = function() {
-		//event.preventDefault();
-		$(xpaths["testTypeConfigurationRecordTableBody"]).html($(xpaths["TestTypeConfigurationRecordListPlaceholder"]).html());
-		$(xpaths["testTypeConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Just a moment...</h5>' });
-		apiHandling.processRequest("get", "/api/config/testType", csrfToken, null)
+		$(xpaths["testTypeConfigurationRecordTableBody"]).indicateTableLoading(5);
+		apiHandling.processRequest("get", "/api/configuration/testType", csrfToken, null)
 			.done(data => getTestTypeConfigurationList_success(data))
-			.catch(error => console.debug(error));
+			.catch(error => getTestTypeConfigurationList_error(error));
 	};
 
 	var getTestTypeConfigurationList_success = function(testTypeConfigurationRecords) {
-		console.debug(testTypeConfigurationRecords);
+		logging.log(testTypeConfigurationRecords);
 		populateDataTable(testTypeConfigurationRecords,
 			xpaths["testTypeConfigurationRecordTable"],
 			xpaths["testTypeConfigurationRecordTableBody"],
 			xpaths["testTypeConfigurationRecordListTemplate"]);
-		$(xpaths["testTypeConfigurationContent"]).unblock();
+		$(xpaths["testTypeConfigurationRecordTableBody"]).indicateTableLoadingCompleted();
 	};
-	
-	var populateDataTable=function(data,tableXPath,tableBodyXPath,templateXPath) {
-		if($.fn.DataTable.isDataTable(tableXPath)) {
-			$(tableXPath).DataTable().destroy();
-		}
-		$(tableBodyXPath).html("");
-		$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
-		$(tableXPath).DataTable();
-		$(xpaths["TestTypeConfigurationContent"]).unblock();
+
+	var getTestTypeConfigurationList_error = function(error) {
+		logging.log(error);
+		$(xpaths["testTypeConfigurationRecordTableBody"]).indicateTableLoadingCompleted();
+		toastr.error(error.responseJSON.path + ' ' + error.responseJSON.error);
 	};
-	
+
 	//Add/Edit
-	
-	var saveTestTypeConfiguration=function(event) {
+
+	var saveTestTypeConfiguration = function(event) {
 		event.preventDefault();
-		if($(xpaths["saveTestTypeConfigurationForm"]).validate()) {
-			$(xpaths["addOrEditTestTypeConfigurationRecordModal"]).modal("hide");
-			$(xpaths["testTypeConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			var saveTestTypeConfigurationData=$(xpaths["saveTestTypeConfigurationForm"]).serializeObject();
-			console.debug(saveTestTypeConfigurationData);
-			apiHandling.processRequest("put", "/api/config/testType", csrfToken, saveTestTypeConfigurationData)
-				.done(data => saveTestTypeConfiguration_success(data))
-				.catch(error => saveTestTypeConfiguration_failure(error,saveTestTypeConfigurationData));
-		}
+		$(this).indicateButtonProcessing();
+		var saveTestTypeConfigurationData = $(xpaths["saveTestTypeConfigurationForm"]).serializeObject();
+		console.debug(saveTestTypeConfigurationData);
+		apiHandling.processRequest("put", "/api/configuration/testType", csrfToken, saveTestTypeConfigurationData)
+			.done(data => saveTestTypeConfiguration_success(data))
+			.catch(error => saveTestTypeConfiguration_failure(error, saveTestTypeConfigurationData));
 	};
-	
-	var saveTestTypeConfiguration_success=function(TestTypeConfiguration) {
-		console.debug(TestTypeConfiguration);
-		toastr.success("Change Type Configuration record saved.");
-		$(xpaths["saveTestTypeConfigurationForm"])[0].reset();
+
+	var saveTestTypeConfiguration_success = function(testTypeConfiguration) {
+		console.debug(testTypeConfiguration);
+		$(xpaths["saveTestTypeConfigurationButton"]).indicateButtonProcessingCompleted();
+		toastr.success("Test Type Configuration '" + testTypeConfiguration.name + "' saved.");
+		$(xpaths["addOrEditTestTypeConfigurationRecordModal"]).modal('hide');
 		getTestTypeConfigurationList();
 	};
-	
-	var saveTestTypeConfiguration_failure=function(error,saveTestTypeConfigurationData) {
+
+	var saveTestTypeConfiguration_failure = function(error, saveTestTypeConfigurationData) {
 		console.debug("here");
 		console.debug(error);
-		toastr.error("Functionality name '" + saveTestTypeConfigurationData.name + "' already exists.");
-		$(xpaths["testTypeConfigurationContent"]).unblock();
+		$(xpaths["saveTestTypeConfigurationButton"]).indicateButtonProcessingCompleted();
+		processApiErrors(error.responseJSON.details);
 		console.debug("here as well");
 	};
-	
-	var showEditModal=function(event) {
+
+	var showEditModal = function(event) {
 		event.preventDefault();
-		var editButtonId=$(this).attr("id");
-		var testTypeConfigurationId=editButtonId.split("_")[1];
-		apiHandling.processRequest("get", "/api/config/testType/" + testTypeConfigurationId, csrfToken, null)
-			.done(data => showEditModal_success(data))
+		$(this).indicateButtonProcessing();
+		var editButtonId = $(this).attr("id");
+		var testTypeConfigurationId = editButtonId.split("_")[1];
+		apiHandling.processRequest("get", "/api/configuration/testType/" + testTypeConfigurationId, csrfToken, null)
+			.done(data => showEditModal_success(data,$(this)))
 			.catch(error => console.debug(error));
 	};
-	
-	var showEditModal_success=function(testTypeConfigurationRecord) {
-		$("input#id").val(testTypeConfigurationRecord.id);
-		$("input#name").val(testTypeConfigurationRecord.name);
-		$("input#relativeTestCasePercentage").val(testTypeConfigurationRecord.relativeTestCasePercentage);
-		$("input#reExecutionPercentage").val(testTypeConfigurationRecord.reExecutionPercentage);
-		$("input#additionalCycleExecutionPercentage").val(testTypeConfigurationRecord.additionalCycleExecutionPercentage);
-		$(xpaths["addOrEditTestTypeConfigurationRecordModal"]).modal("show");
+
+	var showEditModal_success = function(testTypeConfigurationRecord,editButton) {
+		updateEditForm($(xpaths["addOrEditTestTypeConfigurationRecordModal"]), testTypeConfigurationRecord, true);
+		editButton.indicateButtonProcessingCompleted();
 	};
-	
-	var resetAddRecordForm=function(event) {
+
+	var resetAddRecordForm = function(event) {
 		event.preventDefault();
 		$("input#id").val(null);
 		$(xpaths["saveTestTypeConfigurationForm"])[0].reset();
@@ -127,32 +134,17 @@ var testTypeConfigurationProcessing = (function() {
 	};
 
 	var init = function() {
-		$(xpaths["saveTestTypeConfigurationButton"]).click(saveTestTypeConfiguration);
-		$(xpaths["testTypeConfigurationContent"]).on("click",xpaths["editTestTypeConfigurationButtons"],showEditModal);
-		$(xpaths["testTypeConfigurationContent"]).on("click",xpaths["deleteTestTypeConfigurationButtons"],showDeleteModal);
+		logging.enable();
+		$(xpaths["saveTestTypeConfigurationForm"]).submit(saveTestTypeConfiguration);
+		$(xpaths["testTypeConfigurationContent"]).on("click", xpaths["editTestTypeConfigurationButtons"], showEditModal);
+		$(xpaths["testTypeConfigurationContent"]).on("click", xpaths["deleteTestTypeConfigurationButtons"], showDeleteModal);
 		$(xpaths["confirmDeleteTestTypeConfigurationRecordButton"]).click(deleteTestTypeConfigurationRecord);
-		
-		$("button#addTestTypeConfigurationRecordButton").on("click",resetAddRecordForm);
-		
+
+		$("button#addTestTypeConfigurationRecordButton").on("click", resetAddRecordForm);
+		$("#addOrEditTestTypeConfigurationRecordModal").on("hidden.bs.modal",onModalDismiss);
 		csrfToken = $("input#csrf").val();
 		getTestTypeConfigurationList();
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right",
-			"preventDuplicates": false,
-			"onclick": null,
-			"showDuration": "300",
-			"hideDuration": "1000",
-			"timeOut": "5000",
-			"extendedTimeOut": "1000",
-			"showEasing": "swing",
-			"hideEasing": "linear",
-			"showMethod": "fadeIn",
-			"hideMethod": "fadeOut"
-		}
+		toastr.options = getToastrOptions();
 	};
 
 	return {

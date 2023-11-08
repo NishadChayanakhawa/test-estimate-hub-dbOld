@@ -311,7 +311,7 @@
 				</property>
 			</activation>
 			<properties>
-				<skipCodeCoverageCheck>true</skipCodeCoverageCheck>
+				<skipCodeCoverageCheck>false</skipCodeCoverageCheck>
 				<skipTests>false</skipTests>
 				<spring.profiles.active>qa</spring.profiles.active>
 				<testng.suiteXmlFile.name>ui-tests-testng.xml</testng.suiteXmlFile.name>

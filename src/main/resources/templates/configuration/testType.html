@@ -10,6 +10,7 @@
 	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
 	<script th:src="@{/toastr/js/toastr.min.js}"></script>
 	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/common/logging.js}"></script>
 	<script th:src="@{/application/js/configuration/testTypeConfigurationProcessing.js}"></script>
 	<script th:src="@{/datatable/js/datatables.min.js}"></script>
 	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
@@ -20,26 +21,24 @@
 	</script>
 	<script id="testTypeConfigurationRecordListTemplate" type="text/template" sec:authorize="hasRole('ROLE_ADMIN')">
 		<tr>
-			<td>${name}</td>
-			<td>${relativeTestCasePercentage}%</td>
+			<td id="testTypeDisplayName_${id}">${name}</td>
+			<td>${relativeTestCaseCountPercentage}%</td>
 			<td>${reExecutionPercentage}%</td>
 			<td>${additionalCycleExecutionPercentage}%</td>
 			<td>
 				<button class="border-0 bg-transparent" id="editTestTypeConfiguration_${id}">
 					<i class="fa fa-edit"></i> Edit
 				</button>
-				{%if id>1%}
 				<button class="border-0 bg-transparent text-danger" id="deleteTestTypeConfiguration_${id}">
 					<i class="fa fa-trash"></i> Delete
 				</button>
-				{%/if%}
 			</td>
 		</tr>
 	</script>
 	<script id="testTypeConfigurationRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
 		<tr>
 			<td>${name}</td>
-			<td>${relativeTestCasePercentage}%</td>
+			<td>${relativeTestCaseCountPercentage}%</td>
 			<td>${reExecutionPercentage}%</td>
 			<td>${additionalCycleExecutionPercentage}%</td>
 			<td>
@@ -59,13 +58,9 @@
 </head>
 
 <body>
-	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+	<input th:replace="~{BasePage :: csrfElement}" />
 
 	<nav th:replace="~{BasePage :: pageHeader(subTitle='Test Type Configuration')}"></nav>
-
-	<div th:replace="~{BasePage :: sidebar}"></div>
 
 	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
 		aria-hidden="true">
@@ -78,7 +73,7 @@
 				<div class="modal-body">
 					<form id="deleteTestTypeConfigurationDeleteForm">
 						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
-						Confirm delete operation <span id="usernameDisplay"></span>
+						Confirm delete operation for test type <span class="fw-bold text-danger" id="testTypeNameDisplay"></span>
 						<hr>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 						<button id="confirmDeleteTestTypeConfigurationRecord" type="submit" class="btn btn-danger">Confirm Delete</button>
@@ -103,8 +98,8 @@
 							<label for="name">Test Type</label>
 						</div>
 						<div class="form-floating mb-3">
-							<input type="text" class="form-control constraint-numeric" id="relativeTestCasePercentage" name="relativeTestCasePercentage" required />
-							<label for="relativeTestCasePercentage">Relative Test Case %</label>
+							<input type="text" class="form-control constraint-numeric" id="relativeTestCaseCountPercentage" name="relativeTestCaseCountPercentage" required />
+							<label for="relativeTestCaseCountPercentage">Relative Test Count %</label>
 						</div>
 						<div class="form-floating mb-3">
 							<input type="text" class="form-control constraint-numeric" id="reExecutionPercentage" name="reExecutionPercentage" required />
@@ -115,7 +110,7 @@
 							<label for="additionalCycleExecutionPercentage">Additional Cycle Execution %</label>
 						</div>
 						<hr>
-						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+						<button id="dismissModal" type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 						<button id="saveTestTypeConfiguration" type="submit" class="btn btn-primary">Save changes</button>
 					</form>
 				</div>
@@ -134,9 +129,9 @@
 			<thead>
 				<tr>
 					<th>Test Type</th>
-					<th>Relative Test Case Percentage</th>
-					<th>Re-Execution Percentage</th>
-					<th>Additional Cycle Execution Percentage</th>
+					<th>Relative Test Count %</th>
+					<th>Re-Execution %</th>
+					<th>Additional Cycle Execution %</th>
 					<th>Actions</th>
 				</tr>
 			</thead>

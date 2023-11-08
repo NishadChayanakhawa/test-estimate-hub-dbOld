@@ -29,15 +29,6 @@ public class UserManagementPage extends BasePage{
 	@FindBy(xpath="//*[@id=\"saveUser\"]")
 	WebElement saveUserButton;
 	
-	@FindBy(xpath="//*[@id=\"toast-container\"]/div/div[2]")
-	WebElement visibleToastMessage;
-	
-	@FindBy(xpath="//*[@id=\"toast-container\"]/div/button")
-	WebElement closeToastMessage;
-	
-	@FindBy(xpath="//button[@id='dismissPutUserModal']")
-	WebElement dismissModalButton;
-	
 	@FindBy(xpath="//button[@id='confirmDeleteUser']")
 	WebElement confirmDeleteUser;
 	
@@ -83,15 +74,6 @@ public class UserManagementPage extends BasePage{
 		this.driverWait.until(ExpectedConditions.visibilityOf(confirmDeleteUser));
 		this.clickElement(confirmDeleteUser);
 		return this;
-	}
-	
-	public String getToastMessage() {
-		String toastMessage=this.getInnerText(visibleToastMessage);
-		this.clickElement(closeToastMessage);
-		if(this.isDisplayed(dismissModalButton)) {
-			this.clickElement(dismissModalButton);
-		}
-		return toastMessage;
 	}
 
 }

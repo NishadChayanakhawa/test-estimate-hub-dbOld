@@ -40,19 +40,19 @@ public class TestType {
 
 	//relative test case count percentage
 	@Column(nullable = false)
-	@Min(value = 0, message = "{minPercentage}")
-	@Max(value = 100, message = "{maxPercentage}")
+	@Min(value = 0, message = "relativeTestCaseCountPercentage {minimum-value.message} 0")
+	@Max(value = 100, message = "relativeTestCaseCountPercentage {maximum-value.message} 100")
 	private double relativeTestCaseCountPercentage;
 
 	//Re-execution percentage
 	@Column(nullable = false)
-	@Min(value = 0, message = "{minPercentage}")
-	@Max(value = 100, message = "{maxPercentage}")
+	@Min(value = 0, message = "reExecutionPercentage {minimum-value.message} 0")
+	@Max(value = 100, message = "reExecutionPercentage {maximum-value.message} 100")
 	private double reExecutionPercentage;
 
 	//additional cycle execution percentage
 	@Column(nullable = false)
-	@Min(value = 0, message = "{minPercentage}")
-	@Max(value = 100, message = "{maxPercentage}")
+	@Min(value = 0, message = "additionalCycleExecutionPercentage {minimum-value.message} 0")
+	@Max(value = 100, message = "additionalCycleExecutionPercentage {maximum-value.message} 100")
 	private double additionalCycleExecutionPercentage;
 }

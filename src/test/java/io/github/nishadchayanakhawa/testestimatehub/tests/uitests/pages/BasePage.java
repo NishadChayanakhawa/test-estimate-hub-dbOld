@@ -19,8 +19,20 @@ public class BasePage extends ApplicationActions {
 	@FindBy(xpath="//*[@id=\"userManagementOption\"]")
 	WebElement userManagementOption;
 	
+	@FindBy(xpath="//*[@id=\"testTypeConfigurationOption\"]")
+	WebElement testTypeConfigurationOption;
+	
 	@FindBy(xpath="//button[@class='navbar-toggler']")
 	WebElement navbarToggler;
+	
+	@FindBy(xpath="//*[@id=\"toast-container\"]/div/div[2]")
+	WebElement visibleToastMessage;
+	
+	@FindBy(xpath="//*[@id=\"toast-container\"]/div/button")
+	WebElement closeToastMessage;
+	
+	@FindBy(xpath="//button[@id='dismissModal']")
+	WebElement dismissModalButton;
 
 	public BasePage(WebDriver driver) {
 		super(driver);
@@ -49,5 +61,21 @@ public class BasePage extends ApplicationActions {
 		this.clickElement(configurationLink);
 		this.clickElement(userManagementOption);
 		return new UserManagementPage(this.driver);
+	}
+	
+	public TestTypeConfigurationPage navigateToTestTypeConfiguration() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(configurationLink);
+		this.clickElement(testTypeConfigurationOption);
+		return new TestTypeConfigurationPage(this.driver);
+	}
+	
+	public String getToastMessage() {
+		String toastMessage=this.getInnerText(visibleToastMessage);
+		this.clickElement(closeToastMessage);
+		if(this.isDisplayed(dismissModalButton)) {
+			this.clickElement(dismissModalButton);
+		}
+		return toastMessage;
 	}
 }
