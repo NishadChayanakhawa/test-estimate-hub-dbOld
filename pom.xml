@@ -6,6 +6,7 @@
 	<artifactId>test-estimate-hub</artifactId>
 	<version>1.0.0</version>
 	<name>Test Estimate Hub</name>
+	
 
 	<!-- Spring Boot Parent Module -->
 	<parent>
@@ -23,6 +24,7 @@
 				<directory>src/main/resources</directory>
 				<includes>
 					<include>application.properties</include>
+					<include>banner.txt</include>
 				</includes>
 				<filtering>true</filtering>
 			</resource>
@@ -30,6 +32,7 @@
 				<directory>src/main/resources</directory>
 				<excludes>
 					<exclude>application.properties</exclude>
+					<exclude>banner.txt</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>

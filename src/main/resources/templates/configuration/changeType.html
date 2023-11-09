@@ -4,12 +4,13 @@
 <head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
 	th:remove="tag">
 	<title>Test Estimate Hub</title>
-	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />	
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
 	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
 	<script th:src="@{/application/js/common/apiHandling.js}"></script>
 	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
 	<script th:src="@{/toastr/js/toastr.min.js}"></script>
 	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/common/logging.js}"></script>
 	<script th:src="@{/application/js/configuration/changeTypeConfigurationProcessing.js}"></script>
 	<script th:src="@{/datatable/js/datatables.min.js}"></script>
 	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
@@ -20,11 +21,11 @@
 	</script>
 	<script id="changeTypeConfigurationRecordListTemplate" type="text/template" sec:authorize="hasRole('ROLE_ADMIN')">
 		<tr>
-			<td>${name}</td>
+			<td id="changeTypeDisplayName_${id}">${name}</td>
 			<td>${testCaseCountModifier}</td>
-			<td>${testStrategyPercentage}%</td>
-			<td>${testPlanningPercentage}%</td>
-			<td>${managementUpliftPercentage}%</td>
+			<td>${testPlanningEffortAllocationPercentage}%</td>
+			<td>${testPreparationEffortAllocationPercentage}%</td>
+			<td>${managementEffortAllocationPercentage}%</td>
 			<td>
 				<button class="border-0 bg-transparent" id="editChangeTypeConfiguration_${id}">
 					<i class="fa fa-edit"></i> Edit
@@ -37,7 +38,8 @@
 			</td>
 		</tr>
 	</script>
-	<script id="changeTypeConfigurationRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
+	<script id="changeTypeConfigurationRecordListTemplate" type="text/template"
+		sec:authorize="hasAnyRole('ROLE_TEST_MANAGER','ROLE_AUTOMATION_MANAGER')">
 		<tr>
 			<td>${name}</td>
 			<td>${testCaseCountModifier}</td>
@@ -62,13 +64,9 @@
 </head>
 
 <body>
-	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-	<div th:replace="~{BasePage :: toastContainerSection}"></div>
+	<input th:replace="~{BasePage :: csrfElement}" />
 
 	<nav th:replace="~{BasePage :: pageHeader(subTitle='Change Type Configuration')}"></nav>
-
-	<div th:replace="~{BasePage :: sidebar}"></div>
 
 	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
 		aria-hidden="true">
@@ -81,17 +79,19 @@
 				<div class="modal-body">
 					<form id="deleteChangeTypeConfigurationDeleteForm">
 						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
-						Confirm delete operation <span id="usernameDisplay"></span>
+						Confirm delete operation for change type <span class="fw-bold text-danger" id="changeTypeNameDisplay"></span>
 						<hr>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						<button id="confirmDeleteChangeTypeConfigurationRecord" type="submit" class="btn btn-danger">Confirm Delete</button>
+						<button id="confirmDeleteChangeTypeConfigurationRecord" type="submit"
+							class="btn btn-danger">Confirm Delete</button>
 					</form>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="modal fade modal-lg" id="addOrEditChangeTypeConfigurationRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel" aria-hidden="true">
+	<div class="modal fade modal-lg" id="addOrEditChangeTypeConfigurationRecordModal" tabindex="-1"
+		aria-labelledby="putUserModalLabel" aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -106,24 +106,31 @@
 							<label for="name">Change Type</label>
 						</div>
 						<div class="form-floating mb-3">
-							<input type="text" class="form-control constraint-numeric" id="testCaseCountModifier" name="testCaseCountModifier" required />
+							<input type="text" class="form-control constraint-numeric" id="testCaseCountModifier"
+								name="testCaseCountModifier" required />
 							<label for="testCaseCountModifier">Test Case Count Modifier</label>
 						</div>
 						<div class="form-floating mb-3">
-							<input type="text" class="form-control constraint-numeric" id="testStrategyPercentage" name="testStrategyPercentage" required />
-							<label for="testStrategyPercentage">Test Strategy Effort %</label>
+							<input type="text" class="form-control constraint-numeric"
+								id="testPlanningEffortAllocationPercentage"
+								name="testPlanningEffortAllocationPercentage" required />
+							<label for="testPlanningEffortAllocationPercentage">Test Planning Effort %</label>
 						</div>
 						<div class="form-floating mb-3">
-							<input type="text" class="form-control constraint-numeric" id="testPlanningPercentage" name="testPlanningPercentage" required />
-							<label for="testPlanningPercentage">Test Planning Effort %</label>
+							<input type="text" class="form-control constraint-numeric" id="testPreparationEffortAllocationPercentage"
+								name="testPreparationEffortAllocationPercentage" required />
+							<label for="testPreparationEffortAllocationPercentage">Test Preparation Effort %</label>
 						</div>
 						<div class="form-floating mb-3">
-							<input type="text" class="form-control constraint-numeric" id="managementUpliftPercentage" name="managementUpliftPercentage" required />
-							<label for="managementUpliftPercentage">Management Uplift %</label>
+							<input type="text" class="form-control constraint-numeric"
+								id="managementEffortAllocationPercentage" name="managementEffortAllocationPercentage"
+								required />
+							<label for="managementEffortAllocationPercentage">Management Effort %</label>
 						</div>
 						<hr>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						<button id="saveChangeTypeConfiguration" type="submit" class="btn btn-primary">Save changes</button>
+						<button id="saveChangeTypeConfiguration" type="submit" class="btn btn-primary">Save
+							changes</button>
 					</form>
 				</div>
 			</div>
@@ -131,7 +138,8 @@
 	</div>
 
 	<div class="p-3" id="changeTypeConfigurationContent">
-		<button class="btn btn-sm btn-primary" id="addChangeTypeConfigurationRecordButton" sec:authorize="hasRole('ROLE_ADMIN')">
+		<button class="btn btn-sm btn-primary" id="addChangeTypeConfigurationRecordButton"
+			sec:authorize="hasRole('ROLE_ADMIN')">
 			<i class="fa fa-plus"></i> Add Change Type Configuration Record
 		</button>
 		<br>
@@ -142,9 +150,9 @@
 				<tr>
 					<th>Change Type</th>
 					<th>Test Case Count Modifier</th>
-					<th>Test Strategy Effort</th>
-					<th>Test Planning Effort</th>
-					<th>Management Uplift</th>
+					<th>Test Plannin Effort</th>
+					<th>Test Preparation Effort</th>
+					<th>Management Effort</th>
 					<th>Actions</th>
 				</tr>
 			</thead>
