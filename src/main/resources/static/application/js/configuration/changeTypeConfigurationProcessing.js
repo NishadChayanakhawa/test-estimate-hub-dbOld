@@ -39,7 +39,7 @@ var changeTypeConfigurationProcessing = (function() {
 		$(this).indicateButtonProcessing();
 		var changeTypeConfigurationId = $(xpaths["deleteChangeTypeConfigurationDeleteForm"]).serializeObject();
 		apiHandling.processRequest("delete", "/api/configuration/changeType", csrfToken, changeTypeConfigurationId)
-			.done(data => deleteChangeTypeConfigurationRecord_success(data,$("span#changeTypeNameDisplay").val()))
+			.done(data => deleteChangeTypeConfigurationRecord_success(data,$("span#changeTypeNameDisplay").html()))
 			.catch(error => console.debug(error));
 	}
 
