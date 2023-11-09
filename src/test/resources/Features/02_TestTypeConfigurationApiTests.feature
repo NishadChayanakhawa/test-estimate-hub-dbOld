@@ -1,4 +1,4 @@
-Feature: Test typr configuration tests
+Feature: Test type configuration tests
 	Scenario: Add test type
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "TestType/addTestType.json"

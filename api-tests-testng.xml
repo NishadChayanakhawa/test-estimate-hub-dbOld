@@ -17,4 +17,10 @@
 				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.TestTypeConfigurationApiTests" />
 		</classes>
 	</test>
+	<test name="API Tests : Change Type Configuration" parallel="methods" thread-count="1">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.ChangeTypeConfigurationApiTests" />
+		</classes>
+	</test>
 </suite>

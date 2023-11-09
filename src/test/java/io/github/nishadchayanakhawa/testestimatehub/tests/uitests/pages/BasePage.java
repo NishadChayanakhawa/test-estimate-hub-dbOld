@@ -22,6 +22,9 @@ public class BasePage extends ApplicationActions {
 	@FindBy(xpath="//*[@id=\"testTypeConfigurationOption\"]")
 	WebElement testTypeConfigurationOption;
 	
+	@FindBy(xpath="//*[@id=\"changeTypeConfigurationOption\"]")
+	WebElement changeTypeConfigurationOption;
+	
 	@FindBy(xpath="//button[@class='navbar-toggler']")
 	WebElement navbarToggler;
 	
@@ -68,6 +71,13 @@ public class BasePage extends ApplicationActions {
 		this.clickElement(configurationLink);
 		this.clickElement(testTypeConfigurationOption);
 		return new TestTypeConfigurationPage(this.driver);
+	}
+	
+	public ChangeTypeConfigurationPage navigateToChangeTypeConfiguration() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(configurationLink);
+		this.clickElement(changeTypeConfigurationOption);
+		return new ChangeTypeConfigurationPage(this.driver);
 	}
 	
 	public String getToastMessage() {
