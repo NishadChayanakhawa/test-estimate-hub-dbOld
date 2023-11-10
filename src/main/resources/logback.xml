@@ -34,6 +34,7 @@
 	
 	<logger name="org.springframework" level="INFO" />
 	<logger name="org.thymeleaf" level="INFO" />
+	<logger name="org.hibernate" level="INFO"/>
 	
 	<root level="debug">
 		<appender-ref ref="FILE" />
