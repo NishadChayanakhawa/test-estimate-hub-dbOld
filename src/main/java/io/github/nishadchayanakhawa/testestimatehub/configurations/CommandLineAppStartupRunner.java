@@ -39,7 +39,7 @@ public class CommandLineAppStartupRunner  implements CommandLineRunner{
 		loadDefaultGeneralConfiguration();
 		}catch(Exception e) {
 			logger.error(e.getMessage(), e);
-			throw e;
+			throw new Exception("Unhandled exception: " + e.getMessage(),e);
 		}
 	}
 	
