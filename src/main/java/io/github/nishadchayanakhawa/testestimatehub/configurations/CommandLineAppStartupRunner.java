@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import io.github.nishadchayanakhawa.testestimatehub.model.Complexity;
@@ -17,6 +18,7 @@ import io.github.nishadchayanakhawa.testestimatehub.model.dto.GeneralConfigurati
 import io.github.nishadchayanakhawa.testestimatehub.services.GeneralConfigurationService;
 import io.github.nishadchayanakhawa.testestimatehub.services.UserService;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.EntityNotFoundException;
+import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.TestEstimateHubExceptions;
 
 @Component
 @Profile("!dev")
@@ -33,13 +35,13 @@ public class CommandLineAppStartupRunner  implements CommandLineRunner{
 	}
 
 	@Override
-	public void run(String... args) throws Exception {
+	public void run(String... args) {
 		try {
 		loadDefaultUser();
 		loadDefaultGeneralConfiguration();
 		}catch(Exception e) {
 			logger.error(e.getMessage(), e);
-			throw new Exception("Unhandled exception: " + e.getMessage(),e);
+			throw new TestEstimateHubExceptions(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR,"Unhandled exception");
 		}
 	}
 	
