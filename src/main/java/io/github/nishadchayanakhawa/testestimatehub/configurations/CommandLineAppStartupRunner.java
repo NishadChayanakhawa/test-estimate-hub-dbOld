@@ -40,7 +40,6 @@ public class CommandLineAppStartupRunner  implements CommandLineRunner{
 		loadDefaultUser();
 		loadDefaultGeneralConfiguration();
 		}catch(Exception e) {
-			logger.error(e.getMessage(), e);
 			throw new TestEstimateHubExceptions(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR,"Unhandled exception");
 		}
 	}
