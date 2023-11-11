@@ -1,5 +1,6 @@
 var generalConfigurationProcessing = (function() {
 	var csrfToken;
+	const API_PATH="/api/configuration/general";
 	var xpaths = {
 		"saveGeneralConfigurationButton" : "button#saveGeneralConfigurationButton",
 		"generalConfigurationForm" : "form#generalConfigurationForm",
@@ -8,66 +9,74 @@ var generalConfigurationProcessing = (function() {
 		"complexityWeightagePercentageForTestValidation" : "input[name='complexityWeightagePercentageForTestValidation']"
 	};
 	
-	var saveGeneralConfiguration=function(event) {
-		event.preventDefault();
-		if($(xpaths["generalConfigurationForm"]).validate()) {
-			//check % distribution
-			var testDataWeightage=parseFloat($(xpaths["complexityWeightagePercentageForTestDataPreparation"]).val());
-			var testConfigWeightage=parseFloat($(xpaths["complexityWeightagePercentageForTestConfiguration"]).val());
-			var testValidationWeightage=parseFloat($(xpaths["complexityWeightagePercentageForTestValidation"]).val());
-			
-			if((testDataWeightage+testConfigWeightage+testValidationWeightage)!=100.0) {
-				console.debug(testDataWeightage);
-				console.debug(testConfigWeightage);
-				console.debug(testValidationWeightage);
-				console.debug(testValidationWeightage);
-				if(!$(xpaths["complexityWeightagePercentageForTestDataPreparation"]).hasClass("is-invalid")) {
-					$(xpaths["complexityWeightagePercentageForTestDataPreparation"]).addClass("is-invalid");
-				}
-				if(!$(xpaths["complexityWeightagePercentageForTestConfiguration"]).hasClass("is-invalid")) {
-					$(xpaths["complexityWeightagePercentageForTestConfiguration"]).addClass("is-invalid");
-				}
-				if(!$(xpaths["complexityWeightagePercentageForTestValidation"]).hasClass("is-invalid")) {
-					$(xpaths["complexityWeightagePercentageForTestValidation"]).addClass("is-invalid");
-				}
-				toastr.error('Please ensure % weightage add up to 100.0%.');
+	var loadGeneralConfiguration=function() {
+		logging.log("Loading general configuration");
+		$("button#saveGeneralConfigurationButton").html("Loading saved data");
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessing();
+		$("input.is-invalid").removeClass("is-invalid");
+		apiHandling.processRequest("get",API_PATH,csrfToken)
+			.done(data => loadGeneralConfiguration_success(data))
+			.catch(error => loadGeneralConfiguration_failure(error));
+	};
+	
+	var loadGeneralConfiguration_success=function(generalConfiguration) {
+		logging.log(generalConfiguration);
+		$.each(generalConfiguration,function(key,value) {
+			logging.log("Processing key: " + key);
+			if(typeof generalConfiguration[key]=='object') {
+				logging.log("Processing JSON for " + key);
+				$.each(generalConfiguration[key],function(complexity,productivity) {
+					logging.log("Processing Complexity: " + complexity);	
+					$("input#" + key + "-" + complexity).val(productivity);
+				});				
 			} else {
-				apiHandling.processRequest("put", "/api/config/general", csrfToken, $(xpaths["generalConfigurationForm"]).serializeObject())
-					.done(data => saveGeneralConfiguration_success(data))
-					.catch(error => console.debug(error));
-			}	
-		}
+				logging.log("Processing Value: " + value);
+				$("input#" + key).val(value);
+			}
+		});
+		$("button#saveGeneralConfigurationButton").html("Save changes");
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessingCompleted();
+	};
+	
+	var loadGeneralConfiguration_failure=function(error) {
+		$("button#saveGeneralConfigurationButton").html("Save changes");
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessingCompleted();
+		logging.log(error);
+		toastr.error(error.responseJSON.path + ' ' + error.responseJSON.error);
 	}
 	
-	var saveGeneralConfiguration_success=function(data) {
-		console.debug(data);
-		location.reload(true);
+	var saveGeneralConfiguration=function(event) {
+		event.preventDefault();
+		logging.log("Saving general configuration");
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessing();
+		var generalConfigurationSaveRequest=$(xpaths["generalConfigurationForm"]).serializeObject();
+		logging.log(generalConfigurationSaveRequest);
+		apiHandling.processRequest("put",API_PATH,csrfToken,generalConfigurationSaveRequest)
+			.done(data => saveGeneralConfiguration_success(data))
+			.catch(error => saveGeneralConfiguration_failure(error));
+	};
+	
+	var saveGeneralConfiguration_success=function(generalSetting) {
+		logging.log(generalSetting);
+		toastr.success("General setting saved successfully");
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessingCompleted();
+		loadGeneralConfiguration();
+	}
+	
+	var saveGeneralConfiguration_failure=function(error) {
+		$(xpaths["generalConfigurationForm"]).indicateButtonProcessingCompleted();
+		logging.log(error);
+		processApiErrors(error.responseJSON.details);
 	}
 
 	var init = function() {
-		//$(xpaths["saveTestTypeConfigurationButton"]).click(saveTestTypeConfiguration);
-		//$(xpaths["testTypeConfigurationContent"]).on("click",xpaths["editTestTypeConfigurationButtons"],showEditModal);		
-		csrfToken = $("input#csrf").val();
+		logging.enable();
+		logging.log("General Configuration initialized!!!");
+		csrfToken=$("input#csrf").val();
+		toastr.options = getToastrOptions();
 		
 		$(xpaths["generalConfigurationForm"]).submit(saveGeneralConfiguration);
-
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right",
-			"preventDuplicates": false,
-			"onclick": null,
-			"showDuration": "300",
-			"hideDuration": "1000",
-			"timeOut": "5000",
-			"extendedTimeOut": "1000",
-			"showEasing": "swing",
-			"hideEasing": "linear",
-			"showMethod": "fadeIn",
-			"hideMethod": "fadeOut"
-		}
+		loadGeneralConfiguration();
 	};
 
 	return {

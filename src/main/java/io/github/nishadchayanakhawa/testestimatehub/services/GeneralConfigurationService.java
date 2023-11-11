@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 //spring
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionSystemException;
 
 import io.github.nishadchayanakhawa.testestimatehub.model.GeneralConfiguration;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.GeneralConfigurationDTO;
@@ -64,6 +65,7 @@ public class GeneralConfigurationService {
 		}
 		// override id to 1, as only single record will exist throught lifecycle.
 		generalConfiguration.setId(1L);
+		try {
 		// persist general configuration
 		GeneralConfigurationDTO savedGeneralConfiguration = modelMapper.map(
 				this.generalConfigurationRepository
@@ -71,6 +73,9 @@ public class GeneralConfigurationService {
 				GeneralConfigurationDTO.class);
 		logger.info("Saved general configuraion: {}", savedGeneralConfiguration);
 		return savedGeneralConfiguration;
+		} catch(TransactionSystemException e) {
+			throw (TransactionException) new TransactionException(e).initCause(e);
+		}
 	}
 
 	/**
