@@ -30,12 +30,16 @@ public class ReleaseService {
 	private static final Logger logger = LoggerFactory.getLogger(ReleaseService.class);
 
 	// change type repository
-	@Autowired
 	private ReleaseRepository releaseRepository;
 
 	// model mapper
-	@Autowired
 	private ModelMapper modelMapper;
+	
+	@Autowired
+	public ReleaseService(ReleaseRepository releaseRepository,ModelMapper modelMapper) {
+		this.releaseRepository=releaseRepository;
+		this.modelMapper=modelMapper;
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
