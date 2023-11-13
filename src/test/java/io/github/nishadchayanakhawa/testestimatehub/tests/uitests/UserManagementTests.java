@@ -5,10 +5,12 @@ import org.testng.annotations.Test;
 
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.LoginPage;
 import io.nishadc.automationtestingframework.testngcustomization.TestFactory;
+import io.nishadc.automationtestingframework.testngcustomization.annotations.Retry;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.UserDTO;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.UserManagementPage;
 
 public class UserManagementTests {
+	@Retry(3)
 	@Test
 	public void addUser() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -29,6 +31,7 @@ public class UserManagementTests {
 		userManagementPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addUser"})
 	public void addUser_duplicateUsername() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -49,6 +52,7 @@ public class UserManagementTests {
 		userManagementPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addUser"})
 	public void addUser_duplicateEmail() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -69,6 +73,7 @@ public class UserManagementTests {
 		userManagementPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addUser"})
 	public void editUser_withPassword() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -89,6 +94,7 @@ public class UserManagementTests {
 		userManagementPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"editUser_withPassword"})
 	public void editUser_withoutPassword() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -109,6 +115,7 @@ public class UserManagementTests {
 		userManagementPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addUser_duplicateUsername","addUser_duplicateEmail","editUser_withoutPassword"})
 	public void deleteUser() {
 		LoginPage loginPage = LoginPage.getLoginPage();

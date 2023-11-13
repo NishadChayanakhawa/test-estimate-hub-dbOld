@@ -7,8 +7,10 @@ import io.github.nishadchayanakhawa.testestimatehub.model.dto.TestTypeDTO;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.LoginPage;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.TestTypeConfigurationPage;
 import io.nishadc.automationtestingframework.testngcustomization.TestFactory;
+import io.nishadc.automationtestingframework.testngcustomization.annotations.Retry;
 
 public class TestTypeConfigurationTests {
+	@Retry(3)
 	@Test
 	public void addTestType() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -28,6 +30,7 @@ public class TestTypeConfigurationTests {
 		testTypeConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addTestType"})
 	public void addDuplicateTestType() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -47,6 +50,7 @@ public class TestTypeConfigurationTests {
 		testTypeConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test
 	public void addInvalidTestType() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -66,6 +70,7 @@ public class TestTypeConfigurationTests {
 		testTypeConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"addTestType"})
 	public void updateTestType() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -85,6 +90,7 @@ public class TestTypeConfigurationTests {
 		testTypeConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test(dependsOnMethods= {"updateTestType"})
 	public void deleteTestType() {
 		LoginPage loginPage = LoginPage.getLoginPage();

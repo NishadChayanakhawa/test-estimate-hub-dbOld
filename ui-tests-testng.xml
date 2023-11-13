@@ -4,6 +4,8 @@
 	<listeners>
 		<listener
 			class-name="io.nishadc.automationtestingframework.testngcustomization.ReportGenerator"></listener>
+		<listener
+			class-name="io.nishadc.automationtestingframework.testngcustomization.ExecutionController"></listener>
 	</listeners>
 	<test name="UI Tests : User Management" parallel="methods" thread-count="5">
 		<classes>
