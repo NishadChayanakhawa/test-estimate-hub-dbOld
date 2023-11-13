@@ -1,5 +1,6 @@
 package io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages;
 
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -24,6 +25,9 @@ public class BasePage extends ApplicationActions {
 	
 	@FindBy(xpath="//*[@id=\"changeTypeConfigurationOption\"]")
 	WebElement changeTypeConfigurationOption;
+	
+	@FindBy(xpath="//*[@id=\"generalConfigurationOption\"]")
+	WebElement generalConfigurationOption;
 	
 	@FindBy(xpath="//button[@class='navbar-toggler']")
 	WebElement navbarToggler;
@@ -80,11 +84,22 @@ public class BasePage extends ApplicationActions {
 		return new ChangeTypeConfigurationPage(this.driver);
 	}
 	
+	public GeneralConfigurationPage navigateToGeneralConfiguration() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(configurationLink);
+		this.clickElement(generalConfigurationOption);
+		return new GeneralConfigurationPage(this.driver);
+	}
+	
 	public String getToastMessage() {
 		String toastMessage=this.getInnerText(visibleToastMessage);
 		this.clickElement(closeToastMessage);
+		try {
 		if(this.isDisplayed(dismissModalButton)) {
 			this.clickElement(dismissModalButton);
+		}
+		}catch(NoSuchElementException e) {
+			//do nothing
 		}
 		return toastMessage;
 	}
