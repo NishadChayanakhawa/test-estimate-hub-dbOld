@@ -33,7 +33,9 @@
 	</appender>
 	
 	<logger name="org.springframework" level="INFO" />
-	<logger name="org.thymeleaf" level="INFO" />
+	<logger name="org.thymeleaf" level="WARN" />
+	<logger name="org.hibernate" level="WARN"/>
+	<logger name="io.github.nishadchayanakhawa.testestimatehub" level="DEBUG" />
 	
 	<root level="debug">
 		<appender-ref ref="FILE" />

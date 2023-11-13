@@ -61,6 +61,23 @@ $.fn.serializeObject = function() {
 			o[this.name] = elemValue || '';
 		}
 	});
+	
+	//create json if applicable
+	$.each(o,function(key,value){
+		logging.log("Processing Key: " + key);
+		if(key.indexOf("-")!=-1) {
+			var parentKey=key.split("-")[0];
+			var childKey=key.split("-")[1];
+			logging.log("Parent Key: " + parentKey);
+			logging.log("Child Key: " + childKey);
+			if(!o.hasOwnProperty(parentKey)) {
+				o[parentKey]={};
+			}
+			o[parentKey][childKey]=value;
+			delete o[key];
+		}
+	});
+	
 	return o;
 }
 

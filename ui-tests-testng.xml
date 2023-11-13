@@ -23,4 +23,10 @@
 				name="io.github.nishadchayanakhawa.testestimatehub.tests.uitests.ChangeTypeConfigurationTests" />
 		</classes>
 	</test>
+	<test name="UI Tests : General Configuration" parallel="methods" thread-count="5">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.uitests.GeneralConfigurationTests" />
+		</classes>
+	</test>
 </suite>
