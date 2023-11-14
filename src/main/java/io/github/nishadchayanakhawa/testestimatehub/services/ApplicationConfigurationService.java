@@ -31,15 +31,21 @@ import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.Transact
 @Service
 public class ApplicationConfigurationService {
 	// logger
-	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger)LoggerFactory.getLogger(ApplicationConfigurationService.class);
+	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(ApplicationConfigurationService.class);
 
 	// autowired application configuration repository
-	@Autowired
 	private ApplicationConfigurationRepository applicationConfigurationRepository;
 
 	// autowired model mapper
-	@Autowired
 	private ModelMapper modelMapper;
+
+	@Autowired
+	public ApplicationConfigurationService(ApplicationConfigurationRepository applicationConfigurationRepository,
+			ModelMapper modelMapper) {
+		this.applicationConfigurationRepository = applicationConfigurationRepository;
+		this.modelMapper = modelMapper;
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
