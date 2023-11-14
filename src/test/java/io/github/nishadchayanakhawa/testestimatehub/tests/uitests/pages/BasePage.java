@@ -17,8 +17,14 @@ public class BasePage extends ApplicationActions {
 	@FindBy(xpath="//*[@id=\"configurationsLink\"]")
 	WebElement configurationLink;
 	
+	@FindBy(xpath="//*[@id=\"estimationLink\"]")
+	WebElement estimationLink;
+	
 	@FindBy(xpath="//*[@id=\"userManagementOption\"]")
 	WebElement userManagementOption;
+	
+	@FindBy(xpath="//*[@id=\"releaseRecordOption\"]")
+	WebElement releaseRecordOption;
 	
 	@FindBy(xpath="//*[@id=\"testTypeConfigurationOption\"]")
 	WebElement testTypeConfigurationOption;
@@ -89,6 +95,13 @@ public class BasePage extends ApplicationActions {
 		this.clickElement(configurationLink);
 		this.clickElement(generalConfigurationOption);
 		return new GeneralConfigurationPage(this.driver);
+	}
+	
+	public ReleaseManagementPage navigateToReleaseManagement() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(this.estimationLink);
+		this.clickElement(this.releaseRecordOption);
+		return new ReleaseManagementPage(this.driver);
 	}
 	
 	public String getToastMessage() {

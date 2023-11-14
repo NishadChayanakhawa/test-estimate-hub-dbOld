@@ -29,4 +29,10 @@
 				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.GeneralConfigurationApiTests" />
 		</classes>
 	</test>
+	<test name="API Tests : Release Management" parallel="methods" thread-count="1">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.ReleaseManagementApiTests" />
+		</classes>
+	</test>
 </suite>

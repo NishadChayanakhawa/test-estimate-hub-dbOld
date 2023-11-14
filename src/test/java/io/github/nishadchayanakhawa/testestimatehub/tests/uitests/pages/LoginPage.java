@@ -28,6 +28,8 @@ public class LoginPage extends BasePage {
 		ChromeOptions options = new ChromeOptions();
 		options.addArguments("--headless=new");
 		options.addArguments("--remote-allow-origins=*");
+		options.addArguments("start-maximized");
+		options.addArguments("--window-size=1920,1080");
 		WebDriver driver=WebDriverManager.chromedriver().capabilities(options).create();
 		driver.get("http://localhost:8999/login");
 		return new LoginPage(driver);

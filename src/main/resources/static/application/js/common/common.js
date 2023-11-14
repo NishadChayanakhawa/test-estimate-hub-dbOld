@@ -38,7 +38,7 @@ $.fn.validate = function() {
 $.fn.serializeObject = function() {
 	var o = {};
 	//    var a = this.serializeArray();
-	$(this).find('input[type="hidden"], input[type="text"], input[type="password"], input[type="checkbox"]:checked, input[type="radio"]:checked, select').each(function() {
+	$(this).find('input[type="hidden"], input[type="text"], input[type="password"], input[type="date"], input[type="checkbox"]:checked, input[type="radio"]:checked, select').each(function() {
 		if ($(this).attr('type') == 'hidden') { //if checkbox is checked do not take the hidden field
 			var $parent = $(this).parent();
 			var $chb = $parent.find('input[type="checkbox"][name="' + this.name.replace(/\[/g, '\[').replace(/\]/g, '\]') + '"]');
@@ -126,6 +126,8 @@ $.fn.indicateTableLoading = function(columnCount) {
 		paceholderRowToAppend = paceholderRowToAppend + "<td><span class='placeholder col-12'></span></td>"
 	}
 	paceholderRowToAppend = paceholderRowToAppend + "</tr>"
+	$(this).append(paceholderRowToAppend);
+	$(this).append(paceholderRowToAppend);
 	$(this).append(paceholderRowToAppend);
 }
 

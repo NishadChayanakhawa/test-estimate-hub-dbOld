@@ -69,7 +69,7 @@
 
 <body class="text-center">
 	<form class="input-form" th:action="@{/login}" method="POST" autocomplete="off">
-		<img class="mb-4" th:src="@{/images/logo_bg.png}" alt="">
+		<img class="mb-4" th:src="@{/images/logo_bg_home.png}" alt="">
 		<div class="input-group p-1">
 			<span class="input-group-text"><i class="fa-solid fa-user"></i></span>
 			<input type="text" id="username" name="username" class="form-control" required autofocus>
@@ -79,7 +79,7 @@
 			<input type="password" id="password" name="password" class="form-control" required autofocus>
 		</div>
 		<button class="w-100 btn btn-md btn-primary" type="submit">Sign in</button>
-		<p><small>v1.0.0</small></p>
+		<p><small>v@project.version@-@spring.profiles.active@</small></p>
 	</form>
 </body>
 

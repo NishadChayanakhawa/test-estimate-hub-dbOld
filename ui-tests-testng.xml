@@ -4,6 +4,8 @@
 	<listeners>
 		<listener
 			class-name="io.nishadc.automationtestingframework.testngcustomization.ReportGenerator"></listener>
+		<listener
+			class-name="io.nishadc.automationtestingframework.testngcustomization.ExecutionController"></listener>
 	</listeners>
 	<test name="UI Tests : User Management" parallel="methods" thread-count="5">
 		<classes>
@@ -27,6 +29,12 @@
 		<classes>
 			<class
 				name="io.github.nishadchayanakhawa.testestimatehub.tests.uitests.GeneralConfigurationTests" />
+		</classes>
+	</test>
+	<test name="UI Tests : Release Record Management" parallel="methods" thread-count="5">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.uitests.ReleaseRecordManagementTests" />
 		</classes>
 	</test>
 </suite>

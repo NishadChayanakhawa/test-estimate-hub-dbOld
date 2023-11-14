@@ -1,5 +1,6 @@
 var releaseProcessing = (function() {
 	var csrfToken;
+	const API_PATH="/api/release";
 	var xpaths = {
 		"releaseContent" : "div#releaseContent",
 		"addOrEditReleaseRecordModal" : "#addOrEditReleaseRecordModal",
@@ -15,145 +16,128 @@ var releaseProcessing = (function() {
 		"confirmDeleteReleaseRecordButton" : "button#confirmDeleteReleaseRecord",
 		"deleteReleaseDeleteForm" : "form#deleteReleaseDeleteForm"
 	};
-
-	//DELETE Process
+	
+	var deleteRelease=function(event) {
+		event.preventDefault();
+		logging.log("Deleting release");
+		$(xpaths["confirmDeleteReleaseRecordButton"]).indicateButtonProcessing();
+		var deleteRequest=$(xpaths["deleteReleaseDeleteForm"]).serializeObject();
+		logging.log(deleteRequest);
+		apiHandling.processRequest("delete", API_PATH, csrfToken,deleteRequest)
+			.done(data => deleteRelease_success(data))
+			.catch(error => deleteRelease_failure(error));
+	};
+	
+	var deleteRelease_success=function(data) {
+		logging.log(data);
+		$(xpaths["confirmDeleteReleaseRecordButton"]).indicateButtonProcessingCompleted();
+		toastr.success("Release '" + $("span#releaseIdentifierDisplay").html() + "' deleted successfully");
+		$(xpaths["deleteUserConfirmationModal"]).modal('hide');
+		loadReleaseRecords();
+	}
+	
+	var deleteRelease_failure=function(error) {
+		logging.log(error);
+		$(xpaths["confirmDeleteReleaseRecordButton"]).indicateButtonProcessingCompleted();
+		toastr.error(error.responseJSON.path + ' ' + error.responseJSON.error);
+	}
 	
 	var showDeleteModal=function(event) {
 		event.preventDefault();
-		var deleteButtonId=$(this).attr("id");
-		var releaseId=deleteButtonId.split("_")[1];
+		logging.log("Showing delete modal!!!");
+		var deleteButtonId = $(this).attr("id");
+		var releaseId = deleteButtonId.split("_")[1];
+		logging.log("Showing delete modal for release id: " + releaseId);
+		$("span#releaseIdentifierDisplay").html($("td#releaseIdentifier_" + releaseId).html());
 		$("input#deleteAction_id").val(releaseId);
-		$(xpaths["deleteUserConfirmationModal"]).modal("show");
-	};
-	
-	var deleteReleaseRecord=function(event) {
-		event.preventDefault();
-		$(xpaths["deleteUserConfirmationModal"]).modal("hide");
-		$(xpaths["releaseContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Deleting record...</h5>' });
-		var releaseId=$(xpaths["deleteReleaseDeleteForm"]).serializeObject();
-		apiHandling.processRequest("delete", "/api/release", csrfToken, releaseId)
-			.done(data => deleteReleaseRecord_success(data))
-			.catch(error => console.debug(error));
-	}
-	
-	var deleteReleaseRecord_success=function(data) {
-		$(xpaths["releaseContent"]).unblock();
-		getReleaseList();
-	};
-	
-	//Load List
-	
-	var getReleaseList = function() {
-		//event.preventDefault();
-		$(xpaths["releaseRecordTableBody"]).html($(xpaths["ReleaseRecordListPlaceholder"]).html());
-		$(xpaths["releaseContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Just a moment...</h5>' });
-		apiHandling.processRequest("get", "/api/release", csrfToken, null)
-			.done(data => getReleaseList_success(data))
-			.catch(error => console.debug(error));
-	};
-
-	var getReleaseList_success = function(releaseRecords) {
-		console.debug(releaseRecords);
-		populateDataTable(releaseRecords,
-			xpaths["releaseRecordTable"],
-			xpaths["releaseRecordTableBody"],
-			xpaths["releaseRecordListTemplate"]);
-		$(xpaths["releaseContent"]).unblock();
-	};
-	
-	var populateDataTable=function(data,tableXPath,tableBodyXPath,templateXPath) {
-		if($.fn.DataTable.isDataTable(tableXPath)) {
-			$(tableXPath).DataTable().destroy();
-		}
-		$(tableBodyXPath).html("");
-		$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
-		$(tableXPath).DataTable();
-		$(xpaths["ReleaseContent"]).unblock();
-	};
-	
-	//Add/Edit
-	
-	var saveRelease=function(event) {
-		event.preventDefault();
-		if($(xpaths["saveReleaseForm"]).validate()) {
-			$(xpaths["addOrEditReleaseRecordModal"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			$(xpaths["releaseContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			var saveReleaseData=$(xpaths["saveReleaseForm"]).serializeObject();
-			console.debug(saveReleaseData);
-			apiHandling.processRequest("put", "/api/release", csrfToken, saveReleaseData)
-				.done(data => saveRelease_success(data))
-				.catch(error => saveRelease_failure(error,saveReleaseData));
-		}
-	};
-	
-	var saveRelease_success=function(Release) {
-		console.debug(Release);
-		toastr.success("Change Type Configuration record saved.");
-		$(xpaths["saveReleaseForm"])[0].reset();
-		$(xpaths["addOrEditReleaseRecordModal"]).unblock();
-		$(xpaths["addOrEditReleaseRecordModal"]).modal("hide");
-		getReleaseList();
-	};
-	
-	var saveRelease_failure=function(error,saveReleaseData) {
-		console.debug("here");
-		console.debug(error);
-		toastr.error("Functionality name '" + saveReleaseData.name + "' already exists.");
-		$(xpaths["addOrEditReleaseRecordModal"]).unblock();
-		$(xpaths["releaseContent"]).unblock();
-		console.debug("here as well");
+		$(xpaths["deleteUserConfirmationModal"]).modal('show');
 	};
 	
 	var showEditModal=function(event) {
 		event.preventDefault();
-		var editButtonId=$(this).attr("id");
-		var releaseId=editButtonId.split("_")[1];
-		apiHandling.processRequest("get", "/api/release/" + releaseId, csrfToken, null)
-			.done(data => showEditModal_success(data))
-			.catch(error => console.debug(error));
+		logging.log("Showing edit modal!!!");
+		$(this).indicateButtonProcessing();
+		var editButtonId = $(this).attr("id");
+		var releaseId = editButtonId.split("_")[1];
+		apiHandling.processRequest("get", API_PATH + "/" + releaseId, csrfToken)
+			.done(data => showEditModal_success(data,$(this)))
+			.catch(error => showEditModal_failure(error,$(this)));
 	};
 	
-	var showEditModal_success=function(releaseRecord) {
-		$("input#id").val(releaseRecord.id);
-		$("input#identifier").val(releaseRecord.identifier);
-		$("input#name").val(releaseRecord.name);
-		$(xpaths["addOrEditReleaseRecordModal"]).modal("show");
+	var showEditModal_success=function(release,editButton) {
+		logging.log(release);
+		editButton.indicateButtonProcessingCompleted();
+		updateEditForm($(xpaths["addOrEditReleaseRecordModal"]),release,true);
 	};
 	
-	var resetAddRecordForm=function(event) {
+	var showEditModal_failure=function(error,editButton) {
+		logging.log(error);
+		editButton.indicateButtonProcessingCompleted();
+	};
+	
+	var saveRelease=function(event) {
 		event.preventDefault();
-		$("input#id").val(null);
+		logging.log("Saving release!!!");
+		$(this).indicateButtonProcessing();
+		$("input.is-invalid").removeClass('is-invalid');
+		var saveReleaseRequest=$(xpaths["saveReleaseForm"]).serializeObject();
+		logging.log(saveReleaseRequest);
+		apiHandling.processRequest("put",API_PATH,csrfToken,saveReleaseRequest)
+			.done(data => saveRelease_success(data))
+			.catch(error => saveRelease_failure(error));
+	};
+	
+	var saveRelease_success=function(release) {
+		logging.log(release);
+		$(xpaths["saveReleaseButton"]).indicateButtonProcessingCompleted();
+		toastr.success("Release '" + release.identifier + "' saved");
+		$("#addOrEditReleaseRecordModal").modal('hide');
+		loadReleaseRecords();
+	};
+	
+	var saveRelease_failure=function(error) {
+		logging.log(error);
+		$(xpaths["saveReleaseButton"]).indicateButtonProcessingCompleted();
+		processApiErrors(error.responseJSON.details);
+	};
+	
+	var loadReleaseRecords=function() {
+		logging.log("loading release records!!!");
+		$(xpaths["releaseRecordTableBody"]).indicateTableLoading(5);
+		apiHandling.processRequest("get",API_PATH,csrfToken)
+			.done(data => loadReleaseRecords_success(data))
+			.catch(error => loadReleaseRecords_failure(error));
+	};
+	
+	var loadReleaseRecords_success=function(releaseRecords) {
+		logging.log(releaseRecords);
+		$(xpaths["releaseRecordTableBody"]).indicateTableLoadingCompleted();
+		populateDataTable(releaseRecords,xpaths["releaseRecordTable"],xpaths["releaseRecordTableBody"],xpaths["releaseRecordListTemplate"]);
+	};
+	
+	var loadReleaseRecords_failure=function(error) {
+		logging.log(error);
+		$(xpaths["releaseRecordTableBody"]).indicateTableLoadingCompleted();
+		toastr.error(error.responseJSON.path + ' ' + error.responseJSON.error);
+	};
+	
+	var onModalDismiss=function() {
+		logging.log("Dismissed modal");
+		$(".is-invalid").removeClass("is-invalid");
 		$(xpaths["saveReleaseForm"])[0].reset();
-		$(xpaths["addOrEditReleaseRecordModal"]).modal("show");
 	};
 
-	var init = function() {
-		$(xpaths["saveReleaseButton"]).click(saveRelease);
-		$(xpaths["releaseContent"]).on("click",xpaths["editReleaseButtons"],showEditModal);
-		$(xpaths["releaseContent"]).on("click",xpaths["deleteReleaseButtons"],showDeleteModal);
-		$(xpaths["confirmDeleteReleaseRecordButton"]).click(deleteReleaseRecord);
-		
-		$("button#addReleaseRecordButton").on("click",resetAddRecordForm);
-		
-		csrfToken = $("input#csrf").val();
-		getReleaseList();
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right",
-			"preventDuplicates": false,
-			"onclick": null,
-			"showDuration": "300",
-			"hideDuration": "1000",
-			"timeOut": "5000",
-			"extendedTimeOut": "1000",
-			"showEasing": "swing",
-			"hideEasing": "linear",
-			"showMethod": "fadeIn",
-			"hideMethod": "fadeOut"
-		}
+	var init=function() {
+		csrfToken=$("input#csrf").val();
+		toastr.options = getToastrOptions();
+		logging.enable();
+		$(xpaths["saveReleaseForm"]).submit(saveRelease);
+		$("#addOrEditReleaseRecordModal").on("hidden.bs.modal",onModalDismiss);
+		$(xpaths["releaseRecordTableBody"]).on("click",xpaths["editReleaseButtons"],showEditModal);
+		$(xpaths["releaseRecordTableBody"]).on("click",xpaths["deleteReleaseButtons"],showDeleteModal);
+		$(xpaths["deleteReleaseDeleteForm"]).submit(deleteRelease);
+		loadReleaseRecords();
+		logging.log("Release Management initialized!!!");
 	};
 
 	return {

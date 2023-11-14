@@ -5,9 +5,11 @@ import org.testng.annotations.Test;
 
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.LoginPage;
 import io.nishadc.automationtestingframework.testngcustomization.TestFactory;
+import io.nishadc.automationtestingframework.testngcustomization.annotations.Retry;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.GeneralConfigurationPage;
 
 public class GeneralConfigurationTests {
+	@Retry(3)
 	@Test
 	public void saveGeneralConfiguration() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -21,6 +23,7 @@ public class GeneralConfigurationTests {
 		generalConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test
 	public void negativeGeneralConfiguration() {
 		LoginPage loginPage = LoginPage.getLoginPage();
@@ -34,6 +37,7 @@ public class GeneralConfigurationTests {
 		generalConfigurationPage.logout();
 	}
 	
+	@Retry(3)
 	@Test
 	public void inalidDistributionGeneralConfiguration() {
 		LoginPage loginPage = LoginPage.getLoginPage();
