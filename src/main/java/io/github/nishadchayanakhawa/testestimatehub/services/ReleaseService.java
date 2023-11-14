@@ -6,7 +6,6 @@ import java.util.List;
 //model mapper
 import org.modelmapper.ModelMapper;
 //logger
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //spring
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,18 +26,28 @@ import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.Transact
 @Service
 public class ReleaseService {
 	// logger
-	private static final Logger logger = LoggerFactory.getLogger(ReleaseService.class);
+	private static final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(ReleaseService.class);
 
 	// change type repository
 	private ReleaseRepository releaseRepository;
 
 	// model mapper
 	private ModelMapper modelMapper;
-	
+
 	@Autowired
-	public ReleaseService(ReleaseRepository releaseRepository,ModelMapper modelMapper) {
-		this.releaseRepository=releaseRepository;
-		this.modelMapper=modelMapper;
+	public ReleaseService(ReleaseRepository releaseRepository, ModelMapper modelMapper) {
+		this.releaseRepository = releaseRepository;
+		this.modelMapper = modelMapper;
+	}
+	
+	private static void waits() {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -53,6 +62,7 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public ReleaseDTO save(ReleaseDTO releaseToSaveDTO) {
+		waits();
 		logger.debug("Release to save: {}", releaseToSaveDTO);
 		if (releaseToSaveDTO.getEndDate().isBefore(releaseToSaveDTO.getStartDate())) {
 			throw new TransactionException("endDate cannot be before Start Date");
@@ -80,11 +90,12 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public List<ReleaseDTO> getAll() {
+		waits();
 		// get list of saved release records
-		logger.debug("Retreiving all release records");
+		logger.trace("Retreiving all release records");
 		List<ReleaseDTO> releases = this.releaseRepository.findAll().stream()
 				.map(release -> modelMapper.map(release, ReleaseDTO.class)).toList();
-		logger.debug("Releases: {}", releases);
+		logger.trace("Releases: {}", releases);
 		// return the list
 		return releases;
 	}
@@ -99,10 +110,11 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public ReleaseDTO get(Long id) {
+		waits();
 		// retreive release based on id
-		logger.debug("Retreiving release for id {}", id);
+		logger.trace("Retreiving release for id {}", id);
 		ReleaseDTO releaseDTO = modelMapper.map(this.releaseRepository.findById(id).orElseThrow(), ReleaseDTO.class);
-		logger.debug("Retreived release: {}", releaseDTO);
+		logger.trace("Retreived release: {}", releaseDTO);
 		// return release
 		return releaseDTO;
 	}
@@ -117,6 +129,7 @@ public class ReleaseService {
 	 *                           ignored and hence can be set to null.
 	 */
 	public void delete(Long id) {
+		waits();
 		// delete release record
 		logger.debug("Deleting release for id: {}", id);
 		this.releaseRepository.deleteById(id);

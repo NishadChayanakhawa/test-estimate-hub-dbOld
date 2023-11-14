@@ -4,12 +4,13 @@
 <head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
 	th:remove="tag">
 	<title>Test Estimate Hub</title>
-	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />	
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
 	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
 	<script th:src="@{/application/js/common/apiHandling.js}"></script>
 	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
 	<script th:src="@{/toastr/js/toastr.min.js}"></script>
 	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/common/logging.js}"></script>
 	<script th:src="@{/application/js/record/releaseProcessing.js}"></script>
 	<script th:src="@{/datatable/js/datatables.min.js}"></script>
 	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
@@ -18,10 +19,13 @@
 			releaseProcessing.init();
 		});
 	</script>
-	<script id="releaseRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')">
+	<script id="releaseRecordListTemplate" type="text/template"
+		sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')">
 		<tr>
-			<td>${identifier}</td>
+			<td id="releaseIdentifier_${id}">${identifier}</td>
 			<td>${name}</td>
+			<td>${startDate}</td>
+			<td>${endDate}</td>
 			<td>
 				<button class="border-0 bg-transparent" id="editRelease_${id}">
 					<i class="fa fa-edit"></i> Edit
@@ -32,10 +36,13 @@
 			</td>
 		</tr>
 	</script>
-	<script id="releaseRecordListTemplate" type="text/template" sec:authorize="hasAnyRole('ROLE_AUTOMATION_MANAGER','ROLE_TEST_LEAD','ROLE_TESTER')">
+	<script id="releaseRecordListTemplate" type="text/template"
+		sec:authorize="hasAnyRole('ROLE_AUTOMATION_MANAGER','ROLE_TEST_LEAD','ROLE_TESTER')">
 		<tr>
 			<td>${identifier}</td>
 			<td>${name}</td>
+			<td>${startDate}</td>
+			<td>${endDate}</td>
 			<td>
 				<i class="fa-solid fa-ban"></i> N/A
 			</td>
@@ -51,13 +58,9 @@
 </head>
 
 <body>
-	<input type="hidden" id="csrf" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+	<input th:replace="~{BasePage :: csrfElement}" />
 
-	<div th:replace="~{BasePage :: toastContainerSection}"></div>
-
-	<nav th:replace="~{BasePage :: pageHeader(subTitle='Release Records')}"></nav>
-
-	<div th:replace="~{BasePage :: sidebar}"></div>
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Release Record Management')}"></nav>
 
 	<div class="modal fade" id="deleteUserConfirmationModal" tabindex="-1" aria-labelledby="putUserModalLabel"
 		aria-hidden="true">
@@ -70,17 +73,19 @@
 				<div class="modal-body">
 					<form id="deleteReleaseDeleteForm">
 						<input type="hidden" class="form-control" id="deleteAction_id" name="id" required />
-						Confirm delete operation <span id="usernameDisplay"></span>
+						Confirm delete operation for release <span class="fw-bold text-danger" id="releaseIdentifierDisplay"></span>
 						<hr>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-						<button id="confirmDeleteReleaseRecord" type="submit" class="btn btn-danger">Confirm Delete</button>
+						<button id="confirmDeleteReleaseRecord" type="submit" class="btn btn-danger">Confirm
+							Delete</button>
 					</form>
 				</div>
 			</div>
 		</div>
 	</div>
 
-	<div class="modal fade modal-lg" id="addOrEditReleaseRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel" aria-hidden="true">
+	<div class="modal fade modal-lg" id="addOrEditReleaseRecordModal" tabindex="-1" aria-labelledby="putUserModalLabel"
+		aria-hidden="true">
 		<div class="modal-dialog">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -98,6 +103,14 @@
 							<input type="text" class="form-control" id="name" name="name" required />
 							<label for="name">Release Name</label>
 						</div>
+						<div class="form-floating mb-3 col-3">
+							<input id="startDate" name="startDate" class="form-control" type="date" required />
+							<label for="startDate">Start Date</label>
+						</div>
+						<div class="form-floating mb-3 col-3">
+							<input id="endDate" name="endDate" class="form-control" type="date" required />
+							<label for="endDate">Start Date</label>
+						</div>
 						<hr>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
 						<button id="saveRelease" type="submit" class="btn btn-primary">Save changes</button>
@@ -108,7 +121,8 @@
 	</div>
 
 	<div class="p-3" id="releaseContent">
-		<button class="btn btn-sm btn-primary" id="addReleaseRecordButton" sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')">
+		<button class="btn btn-sm btn-primary" id="addReleaseRecordButton"
+			sec:authorize="hasAnyRole('ROLE_ADMIN','ROLE_TEST_MANAGER')" data-bs-toggle="modal" data-bs-target="#addOrEditReleaseRecordModal">
 			<i class="fa fa-plus"></i> Add Release Record
 		</button>
 		<br>
@@ -119,6 +133,8 @@
 				<tr>
 					<th>ID</th>
 					<th>Name</th>
+					<th>Start</th>
+					<th>End</th>
 					<th>Actions</th>
 				</tr>
 			</thead>

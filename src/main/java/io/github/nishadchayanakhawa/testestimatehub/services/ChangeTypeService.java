@@ -3,7 +3,6 @@ package io.github.nishadchayanakhawa.testestimatehub.services;
 //import section
 //logger
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 //java utils
 import java.util.List;
 //model mapper
@@ -30,7 +29,8 @@ import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.Transact
 @Service
 public class ChangeTypeService {
 	// logger
-	private static final Logger logger = LoggerFactory.getLogger(ChangeTypeService.class);
+	private static final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(ChangeTypeService.class);
 
 	// change type repository
 	private ChangeTypeRepository changeTypeRepository;
@@ -85,10 +85,10 @@ public class ChangeTypeService {
 	 */
 	public List<ChangeTypeDTO> getAll() {
 		// get list of saved change types
-		logger.debug("Retreiving all change type records");
+		logger.trace("Retreiving all change type records");
 		List<ChangeTypeDTO> changeTypes = this.changeTypeRepository.findAll().stream()
 				.map(changeType -> modelMapper.map(changeType, ChangeTypeDTO.class)).toList();
-		logger.debug("Change types: {}", changeTypes);
+		logger.trace("Change types: {}", changeTypes);
 		// return the list
 		return changeTypes;
 	}
@@ -106,10 +106,10 @@ public class ChangeTypeService {
 	 */
 	public ChangeTypeDTO get(Long id) {
 		// retreive change type based on id
-		logger.debug("Retreiving change type for id {}", id);
+		logger.trace("Retreiving change type for id {}", id);
 		ChangeTypeDTO changeTypeDTO = modelMapper.map(this.changeTypeRepository.findById(id)
 				.orElseThrow(() -> new EntityNotFoundException("Change Type", id)), ChangeTypeDTO.class);
-		logger.debug("Retreived change type: {}", changeTypeDTO);
+		logger.trace("Retreived change type: {}", changeTypeDTO);
 		// return change type
 		return changeTypeDTO;
 	}

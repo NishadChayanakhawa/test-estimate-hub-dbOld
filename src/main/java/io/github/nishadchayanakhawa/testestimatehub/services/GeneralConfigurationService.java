@@ -5,7 +5,6 @@ package io.github.nishadchayanakhawa.testestimatehub.services;
 //model mapper
 import org.modelmapper.ModelMapper;
 //logger
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //spring
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +27,20 @@ import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.Transact
 @Service
 public class GeneralConfigurationService {
 	// logger
-	private static Logger logger = LoggerFactory.getLogger(GeneralConfigurationService.class);
+	private static ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(GeneralConfigurationService.class);
 
 	// autowired application configuration repository
 	private GeneralConfigurationRepository generalConfigurationRepository;
 
 	// autowired model mapper
 	private ModelMapper modelMapper;
-	
+
 	@Autowired
-	public GeneralConfigurationService(GeneralConfigurationRepository generalConfigurationRepository,ModelMapper modelMapper) {
-		this.modelMapper=modelMapper;
-		this.generalConfigurationRepository=generalConfigurationRepository;
+	public GeneralConfigurationService(GeneralConfigurationRepository generalConfigurationRepository,
+			ModelMapper modelMapper) {
+		this.modelMapper = modelMapper;
+		this.generalConfigurationRepository = generalConfigurationRepository;
 	}
 
 	/**
@@ -66,14 +67,14 @@ public class GeneralConfigurationService {
 		// override id to 1, as only single record will exist throught lifecycle.
 		generalConfiguration.setId(1L);
 		try {
-		// persist general configuration
-		GeneralConfigurationDTO savedGeneralConfiguration = modelMapper.map(
-				this.generalConfigurationRepository
-						.save(modelMapper.map(generalConfiguration, GeneralConfiguration.class)),
-				GeneralConfigurationDTO.class);
-		logger.info("Saved general configuraion: {}", savedGeneralConfiguration);
-		return savedGeneralConfiguration;
-		} catch(TransactionSystemException e) {
+			// persist general configuration
+			GeneralConfigurationDTO savedGeneralConfiguration = modelMapper.map(
+					this.generalConfigurationRepository
+							.save(modelMapper.map(generalConfiguration, GeneralConfiguration.class)),
+					GeneralConfigurationDTO.class);
+			logger.info("Saved general configuraion: {}", savedGeneralConfiguration);
+			return savedGeneralConfiguration;
+		} catch (TransactionSystemException e) {
 			throw (TransactionException) new TransactionException(e).initCause(e);
 		}
 	}
@@ -89,8 +90,9 @@ public class GeneralConfigurationService {
 	 */
 	public GeneralConfigurationDTO get() {
 		GeneralConfigurationDTO generalConfiguration = modelMapper.map(this.generalConfigurationRepository.findById(1L)
-				.orElseThrow(() -> new EntityNotFoundException("General Configuration", 1L)), GeneralConfigurationDTO.class);
-		logger.info("General configuraion found: {}", generalConfiguration);
+				.orElseThrow(() -> new EntityNotFoundException("General Configuration", 1L)),
+				GeneralConfigurationDTO.class);
+		logger.trace("General configuraion found: {}", generalConfiguration);
 		return generalConfiguration;
 	}
 }

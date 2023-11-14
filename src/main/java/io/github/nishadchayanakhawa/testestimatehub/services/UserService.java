@@ -6,7 +6,6 @@ import java.util.List;
 //model mapper
 import org.modelmapper.ModelMapper;
 //logger
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 //spring
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +34,8 @@ import org.hibernate.exception.ConstraintViolationException;
 @Service
 public class UserService {
 	// logger
-	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
+	private static final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(UserService.class);
 
 	// user repository
 	private UserRepository userRepository;
@@ -45,12 +45,12 @@ public class UserService {
 
 	// password encoder
 	private PasswordEncoder passwordEncoder;
-	
+
 	@Autowired
-	public UserService(UserRepository userRepository,ModelMapper modelMapper,PasswordEncoder passwordEncoder) {
-		this.userRepository=userRepository;
-		this.modelMapper=modelMapper;
-		this.passwordEncoder=passwordEncoder;
+	public UserService(UserRepository userRepository, ModelMapper modelMapper, PasswordEncoder passwordEncoder) {
+		this.userRepository = userRepository;
+		this.modelMapper = modelMapper;
+		this.passwordEncoder = passwordEncoder;
 	}
 
 	/**
@@ -114,7 +114,7 @@ public class UserService {
 				.toList();
 		// set password to null in dto object
 		users.stream().forEach(userDTO -> userDTO.setPassword(null));
-		logger.debug("User list: {}", users);
+		logger.trace("User list: {}", users);
 		// return list
 		return users;
 	}
@@ -136,7 +136,7 @@ public class UserService {
 				UserDTO.class);
 		// set password to null in dto object
 		user.setPassword(null);
-		logger.debug("User for id {} is: {}", id, user);
+		logger.trace("User for id {} is: {}", id, user);
 		// return user
 		return user;
 	}

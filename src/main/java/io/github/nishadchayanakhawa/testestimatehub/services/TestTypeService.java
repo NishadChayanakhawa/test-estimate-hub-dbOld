@@ -3,7 +3,6 @@ package io.github.nishadchayanakhawa.testestimatehub.services;
 //import section
 //logger
 import org.slf4j.LoggerFactory;
-import org.slf4j.Logger;
 //java utils
 import java.util.List;
 //model mapper
@@ -31,7 +30,8 @@ import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.Transact
 @Service
 public class TestTypeService {
 	// logger
-	private static final Logger logger = LoggerFactory.getLogger(TestTypeService.class);
+	private static final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
+			.getLogger(TestTypeService.class);
 
 	// test type repository
 	private TestTypeRepository testTypeRepository;
@@ -86,10 +86,10 @@ public class TestTypeService {
 	 */
 	public List<TestTypeDTO> getAll() {
 		// get list of saved test types
-		logger.debug("Retreiving all test type records");
+		logger.trace("Retreiving all test type records");
 		List<TestTypeDTO> testTypes = this.testTypeRepository.findAll().stream()
 				.map(testType -> modelMapper.map(testType, TestTypeDTO.class)).toList();
-		logger.debug("Test types: {}", testTypes);
+		logger.trace("Test types: {}", testTypes);
 		// return the list
 		return testTypes;
 	}
@@ -107,11 +107,11 @@ public class TestTypeService {
 	 */
 	public TestTypeDTO get(Long id) {
 		// retreive test type based on id
-		logger.debug("Retreiving test type for id {}", id);
+		logger.trace("Retreiving test type for id {}", id);
 		TestTypeDTO testTypeDTO = modelMapper.map(
 				this.testTypeRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Test Type", id)),
 				TestTypeDTO.class);
-		logger.debug("Retreived test type: {}", testTypeDTO);
+		logger.trace("Retreived test type: {}", testTypeDTO);
 		// return test type
 		return testTypeDTO;
 	}
