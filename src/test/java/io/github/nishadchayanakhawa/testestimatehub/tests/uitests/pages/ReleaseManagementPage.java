@@ -28,7 +28,7 @@ public class ReleaseManagementPage extends BasePage{
 	@FindBy(xpath="//input[@id='endDate']")
 	WebElement endDate;
 	
-	@FindBy(xpath="//button[@id='saveRelease']")
+	@FindBy(xpath="//button[text()='Save changes']")
 	WebElement saveRelease;
 	
 	@FindBy(xpath="//button[@id='confirmDeleteReleaseRecord']")
