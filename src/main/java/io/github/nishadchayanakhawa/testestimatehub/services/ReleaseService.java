@@ -41,15 +41,6 @@ public class ReleaseService {
 		this.modelMapper = modelMapper;
 	}
 	
-	private static void waits() {
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
 	/**
 	 * <b>Method Name</b>: save<br>
 	 * <b>Description</b>: Save release record.<br>
@@ -62,7 +53,6 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public ReleaseDTO save(ReleaseDTO releaseToSaveDTO) {
-		waits();
 		logger.debug("Release to save: {}", releaseToSaveDTO);
 		if (releaseToSaveDTO.getEndDate().isBefore(releaseToSaveDTO.getStartDate())) {
 			throw new TransactionException("endDate cannot be before Start Date");
@@ -90,7 +80,6 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public List<ReleaseDTO> getAll() {
-		waits();
 		// get list of saved release records
 		logger.trace("Retreiving all release records");
 		List<ReleaseDTO> releases = this.releaseRepository.findAll().stream()
@@ -110,7 +99,6 @@ public class ReleaseService {
 	 *         ReleaseDTO}
 	 */
 	public ReleaseDTO get(Long id) {
-		waits();
 		// retreive release based on id
 		logger.trace("Retreiving release for id {}", id);
 		ReleaseDTO releaseDTO = modelMapper.map(this.releaseRepository.findById(id).orElseThrow(), ReleaseDTO.class);
@@ -129,7 +117,6 @@ public class ReleaseService {
 	 *                           ignored and hence can be set to null.
 	 */
 	public void delete(Long id) {
-		waits();
 		// delete release record
 		logger.debug("Deleting release for id: {}", id);
 		this.releaseRepository.deleteById(id);

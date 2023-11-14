@@ -31,7 +31,7 @@ var releaseProcessing = (function() {
 	var deleteRelease_success=function(data) {
 		logging.log(data);
 		$(xpaths["confirmDeleteReleaseRecordButton"]).indicateButtonProcessingCompleted();
-		toastr.success("Release " + $("span#releaseIdentifierDisplay").html() + " deleted successfully");
+		toastr.success("Release '" + $("span#releaseIdentifierDisplay").html() + "' deleted successfully");
 		$(xpaths["deleteUserConfirmationModal"]).modal('hide');
 		loadReleaseRecords();
 	}

@@ -27,6 +27,8 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
 	private UserService userService;
 	private GeneralConfigurationService generalConfigurationService;
+	
+	private static final String ADMIN_USERNAME="admin";
 
 	@Autowired
 	public CommandLineAppStartupRunner(UserService userService,
@@ -51,14 +53,14 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		if (userService.getAll().isEmpty()) {
 			logger.warn("No users were found. Default user will be created.");
 			UserDTO user = new UserDTO();
-			user.setUsername("admin");
-			user.setPassword("admin");
-			user.setFirstName("Admin");
+			user.setUsername(ADMIN_USERNAME);
+			user.setPassword(ADMIN_USERNAME);
+			user.setFirstName(ADMIN_USERNAME);
 			user.setLastName("LNU");
-			user.setEmail("admin@company.com");
+			user.setEmail(ADMIN_USERNAME + "@company.com");
 			user.setRoles(Set.of(Role.ADMIN, Role.TESTER));
 			userService.save(user);
-			logger.info("User added with username: {} and password: {}", user.getUsername(), "admin");
+			logger.info("User added with username: {} and password: {}", ADMIN_USERNAME,ADMIN_USERNAME);
 		}
 	}
 
