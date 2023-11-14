@@ -36,8 +36,12 @@ public class ApplicationConfigurationApi {
 	private static final Logger logger = LoggerFactory.getLogger(ApplicationConfigurationApi.class);
 
 	// application configuration service
-	@Autowired
 	private ApplicationConfigurationService applicationConfigurationService;
+	
+	@Autowired
+	public ApplicationConfigurationApi(ApplicationConfigurationService applicationConfigurationService) {
+		this.applicationConfigurationService=applicationConfigurationService;
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
