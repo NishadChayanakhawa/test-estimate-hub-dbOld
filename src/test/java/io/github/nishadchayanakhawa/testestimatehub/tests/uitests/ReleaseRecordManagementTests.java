@@ -6,6 +6,7 @@ import org.assertj.core.api.Assertions;
 import org.testng.annotations.Test;
 
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.ReleaseDTO;
+import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.HomePage;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.LoginPage;
 import io.github.nishadchayanakhawa.testestimatehub.tests.uitests.pages.ReleaseManagementPage;
 import io.nishadc.automationtestingframework.testngcustomization.TestFactory;
@@ -24,9 +25,12 @@ public class ReleaseRecordManagementTests {
 		release.setEndDate(LocalDate.of(2023,12, 20));
 
 		TestFactory.recordTest("Add release", loginPage.getDriver());
-		ReleaseManagementPage releaseManagementPage = loginPage.login("admin", "admin")
-				.navigateToReleaseManagement().add(release);
-
+		HomePage homePage = loginPage.login("admin", "admin");
+		TestFactory.recordTestStep("Loggin in",true);
+		ReleaseManagementPage releaseManagementPage=homePage.navigateToReleaseManagement();
+		TestFactory.recordTestStep("Navigated to release management",true);
+		releaseManagementPage.add(release);
+		TestFactory.recordTestStep("Added release",true);
 		String actualToastMessage = releaseManagementPage.getToastMessage();
 		Assertions.assertThat(actualToastMessage).isEqualTo("Release 'Dec-2023' saved");
 		TestFactory.recordTestStep(actualToastMessage, true);
