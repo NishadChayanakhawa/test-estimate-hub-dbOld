@@ -22,7 +22,7 @@ public class ReleaseRecordManagementTests {
 		release.setIdentifier("Dec-2023");
 		release.setName("December 2023 release");
 		release.setStartDate(LocalDate.of(2023,11, 1));
-		release.setEndDate(LocalDate.of(2023,12, 20));
+		release.setEndDate(LocalDate.of(2023,12, 9));
 
 		TestFactory.recordTest("Add release", loginPage.getDriver());
 		HomePage homePage = loginPage.login("admin", "admin");
@@ -46,7 +46,7 @@ public class ReleaseRecordManagementTests {
 		release.setIdentifier("Dec-2023");
 		release.setName("December 2023 release");
 		release.setStartDate(LocalDate.of(2023,11, 1));
-		release.setEndDate(LocalDate.of(2023,12, 20));
+		release.setEndDate(LocalDate.of(2023,12, 9));
 
 		TestFactory.recordTest("Add duplicate release", loginPage.getDriver());
 		ReleaseManagementPage releaseManagementPage = loginPage.login("admin", "admin")
@@ -66,7 +66,7 @@ public class ReleaseRecordManagementTests {
 		ReleaseDTO release = new ReleaseDTO();
 		release.setIdentifier("Dec-2023");
 		release.setName("December 2023 release");
-		release.setStartDate(LocalDate.of(2023,12, 20));
+		release.setStartDate(LocalDate.of(2023,12, 2));
 		release.setEndDate(LocalDate.of(2023,11, 1));
 
 		TestFactory.recordTest("Add invalid release", loginPage.getDriver());
@@ -88,7 +88,7 @@ public class ReleaseRecordManagementTests {
 		release.setIdentifier("Dec-2023");
 		release.setName("December 2023 Major release");
 		release.setStartDate(LocalDate.of(2023,12, 1));
-		release.setEndDate(LocalDate.of(2023,12, 29));
+		release.setEndDate(LocalDate.of(2023,12, 8));
 
 		TestFactory.recordTest("Update release", loginPage.getDriver());
 		ReleaseManagementPage releaseManagementPage = loginPage.login("admin", "admin")
