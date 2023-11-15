@@ -14,7 +14,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import io.github.nishadchayanakhawa.testestimatehub.repositories.ChangeRepository;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.DuplicateEntityException;
+import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.TransactionException;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.ChangeDTO;
+import io.github.nishadchayanakhawa.testestimatehub.model.dto.ReleaseDTO;
 import io.github.nishadchayanakhawa.testestimatehub.model.Change;
 
 /**
@@ -32,12 +34,15 @@ public class ChangeService {
 	// change type repository
 	private ChangeRepository changeRepository;
 
+	private ReleaseService releaseService;
+
 	// model mapper
 	private ModelMapper modelMapper;
 
 	@Autowired
-	public ChangeService(ChangeRepository changeRepository, ModelMapper modelMapper) {
+	public ChangeService(ChangeRepository changeRepository, ReleaseService releaseService, ModelMapper modelMapper) {
 		this.changeRepository = changeRepository;
+		this.releaseService = releaseService;
 		this.modelMapper = modelMapper;
 	}
 
@@ -54,6 +59,12 @@ public class ChangeService {
 	 */
 	public ChangeDTO save(ChangeDTO changeToSaveDTO) {
 		logger.debug("Change to save: {}", changeToSaveDTO);
+		// check change dates against release dates
+		ReleaseDTO release = this.releaseService.get(changeToSaveDTO.getReleaseId());
+		if (changeToSaveDTO.getStartDate().isBefore(release.getStartDate())
+				|| changeToSaveDTO.getEndDate().isAfter(release.getEndDate())) {
+			throw new TransactionException("startDate-endDate do not align with selected release");
+		}
 		try {
 			// save change record
 			ChangeDTO savedChangeDTO = modelMapper
