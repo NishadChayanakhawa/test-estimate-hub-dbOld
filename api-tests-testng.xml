@@ -5,6 +5,18 @@
 		<listener
 			class-name="io.nishadc.automationtestingframework.testngcustomization.ReportGenerator"></listener>
 	</listeners>
+	<test name="Coverage Tests" parallel="methods" thread-count="1">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.CoverageTests" />
+		</classes>
+	</test>
+	<test name="Controller Tests" parallel="methods" thread-count="1">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.ControllerTests" />
+		</classes>
+	</test>
 	<test name="API Tests : User Management" parallel="methods" thread-count="1">
 		<classes>
 			<class
@@ -27,6 +39,12 @@
 		<classes>
 			<class
 				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.GeneralConfigurationApiTests" />
+		</classes>
+	</test>
+	<test name="API Tests : Application Configuration" parallel="methods" thread-count="1">
+		<classes>
+			<class
+				name="io.github.nishadchayanakhawa.testestimatehub.tests.apitests.ApplicationConfigurationApiTests" />
 		</classes>
 	</test>
 	<test name="API Tests : Release Management" parallel="methods" thread-count="1">

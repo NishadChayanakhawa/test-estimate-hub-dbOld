@@ -17,9 +17,18 @@ var logging=(function() {
 		}
 	}
 	
+	var setLoggingSwitch=function(switchValue) {
+		if(switchValue) {
+			enable();
+		} else {
+			disable();
+		}
+	}
+	
 	return {
 		enable : enable,
 		disable : disable,
+		setLoggingSwitch : setLoggingSwitch,
 		log : log
 	}
 })();
