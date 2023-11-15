@@ -16,9 +16,13 @@ public class DuplicateEntityException extends TestEstimateHubExceptions {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
+	
+	public DuplicateEntityException(String message) {
+		super(message,HttpStatus.CONFLICT,
+				"Entity with unique values already exists");
+	}
 
 	public DuplicateEntityException(String entity, String field, String value) {
-		super(String.format("%s '%s' already exists for another %s", field, value, entity), HttpStatus.CONFLICT,
-				"Entity with unique values already exists");
+		this(String.format("%s '%s' already exists for another %s", field, value, entity));
 	}
 }

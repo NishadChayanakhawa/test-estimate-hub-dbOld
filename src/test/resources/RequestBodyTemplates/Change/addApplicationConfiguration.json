@@ -1,0 +1,6 @@
+{
+	"application" : "TEH",
+	"module" : "Configuration",
+	"subModule" : "Change Type Management",
+	"baseTestScriptCount" : 5
+}
