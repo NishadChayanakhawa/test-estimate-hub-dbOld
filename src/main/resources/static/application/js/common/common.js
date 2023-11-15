@@ -149,7 +149,6 @@ $.fn.indicateButtonProcessing = function() {
 	} else {
 		$(this).append("<span class='temp-spinner'> <i class='fa-solid fa-spinner fa-spin'></i></span>");
 	}
-	
 }
 
 $.fn.indicateButtonProcessingCompleted = function() {
@@ -216,4 +215,8 @@ var populateDataTable = function(data, tableXPath, tableBodyXPath, templateXPath
 	$(tableBodyXPath).html("");
 	$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
 	$(tableXPath).DataTable();
+};
+
+var processUnexpectedError=function(error) {
+	toastr.error("<b><u>Unexpected error</u></b>: " + error.responseJSON.path + ' ' + error.responseJSON.error + "<br><br><b>Please report this issue to development team.</b>");
 };

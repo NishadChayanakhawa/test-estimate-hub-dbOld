@@ -46,6 +46,15 @@ public class ApplicationConfigurationService {
 		this.applicationConfigurationRepository = applicationConfigurationRepository;
 		this.modelMapper = modelMapper;
 	}
+	
+	private static void waits() {
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * <b>Method Name</b>: save<br>
@@ -55,6 +64,7 @@ public class ApplicationConfigurationService {
 	 * @return
 	 */
 	public ApplicationConfigurationDTO save(ApplicationConfigurationDTO applicationConfigurationToSaveDTO) {
+		waits();
 		logger.debug("Saving: {}", applicationConfigurationToSaveDTO);
 		try {
 			// persist application configuration
@@ -79,6 +89,7 @@ public class ApplicationConfigurationService {
 	}
 
 	public List<ApplicationConfigurationDTO> getAll() {
+		waits();
 		List<ApplicationConfigurationDTO> applicationConfigurations = this.applicationConfigurationRepository.findAll()
 				.stream().map(applicationConfiguration -> modelMapper.map(applicationConfiguration,
 						ApplicationConfigurationDTO.class))
@@ -88,6 +99,7 @@ public class ApplicationConfigurationService {
 	}
 
 	public ApplicationConfigurationDTO get(Long id) {
+		waits();
 		logger.debug("Looking up application configuration for id: {}", id);
 		ApplicationConfigurationDTO applicationConfiguration = modelMapper.map(
 				this.applicationConfigurationRepository.findById(id)
@@ -98,6 +110,7 @@ public class ApplicationConfigurationService {
 	}
 
 	public void delete(Long id) {
+		waits();
 		logger.debug("Deleting application configuration id: {}", id);
 		this.applicationConfigurationRepository.deleteById(id);
 	}

@@ -1,179 +1,229 @@
 var applicationConfigurationProcessing = (function() {
+	//csrf token
 	var csrfToken;
+	//api path
+	const API_PATH = "/api/configuration/application";
+	//record name
+	const RECORD_NAME = "Application configuration";
+
+	//common xpaths
 	var xpaths = {
-		"applicationConfigurationContent" : "div#applicationConfigurationContent",
-		"addOrEditApplicationConfigurationRecordModal" : "#addOrEditApplicationConfigurationRecordModal",
-		"applicationConfigurationRecordListPlaceholder" : "#applicationConfigurationRecordListPlaceholder",
-		"saveApplicationConfigurationButton" : "button#saveApplicationConfiguration",
-		"saveApplicationConfigurationForm" : "form#saveApplicationConfigurationForm",
-		"applicationConfigurationRecordTable" : "table#applicationConfigurationRecordTable",
-		"applicationConfigurationRecordTableBody" : "tbody#applicationConfigurationRecordTableBody",
-		"applicationConfigurationRecordListTemplate" : "#applicationConfigurationRecordListTemplate",
-		"editApplicationConfigurationButtons" : "button[id^='editApplicationConfiguration_']",
-		"deleteApplicationConfigurationButtons" : "button[id^='deleteApplicationConfiguration_']",
-		"deleteUserConfirmationModal" : "div#deleteUserConfirmationModal",
-		"confirmDeleteApplicationConfigurationRecordButton" : "button#confirmDeleteApplicationConfigurationRecord",
-		"deleteApplicationConfigurationDeleteForm" : "form#deleteApplicationConfigurationDeleteForm"
-	};
-
-	//DELETE Process
-	
-	var showDeleteModal=function(event) {
-		event.preventDefault();
-		var deleteButtonId=$(this).attr("id");
-		apiHandling.processRequest("get", "/api/config/application/" + deleteButtonId.split("_")[1], csrfToken, null)
-			.done(data => showDeleteModal_success(data))
-			.catch(error => console.debug(error));
-	};
-	
-	var showDeleteModal_success=function(applicationConfigurationRecord) {
-		$("input#deleteAction_id").val(applicationConfigurationRecord.id);
-		$(xpaths["deleteUserConfirmationModal"]).modal("show");
-	};
-	
-	var deleteApplicationConfigurationRecord=function(event) {
-		event.preventDefault();
-		$(xpaths["deleteUserConfirmationModal"]).modal("hide");
-		$(xpaths["applicationConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Deleting record...</h5>' });
-		var applicationConfigurationId=$(xpaths["deleteApplicationConfigurationDeleteForm"]).serializeObject();
-		apiHandling.processRequest("delete", "/api/config/application", csrfToken, applicationConfigurationId)
-			.done(data => deleteApplicationConfigurationRecord_success(data))
-			.catch(error => console.debug(error));
-	}
-	
-	var deleteApplicationConfigurationRecord_success=function(data) {
-		getApplicationConfigurationList();
-		$(xpaths["applicationConfigurationContent"]).unblock();
-	};
-	
-	//Load List
-	
-	var getApplicationConfigurationList = function() {
-		//event.preventDefault();
-		$(xpaths["applicationConfigurationRecordTableBody"]).html($(xpaths["applicationConfigurationRecordListPlaceholder"]).html());
-		$(xpaths["applicationConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Just a moment...</h5>' });
-		apiHandling.processRequest("get", "/api/config/application", csrfToken, null)
-			.done(data => getApplicationConfigurationList_success(data))
-			.catch(error => console.debug(error));
-	};
-
-	var getApplicationConfigurationList_success = function(applicationConfigurationRecords) {
-		console.debug(applicationConfigurationRecords);
-		populateDataTable(applicationConfigurationRecords,
-			xpaths["applicationConfigurationRecordTable"],
-			xpaths["applicationConfigurationRecordTableBody"],
-			xpaths["applicationConfigurationRecordListTemplate"]);
-		$(xpaths["applicationConfigurationContent"]).unblock();
-	};
-	
-	var populateDataTable=function(data,tableXPath,tableBodyXPath,templateXPath) {
-		if($.fn.DataTable.isDataTable(tableXPath)) {
-			$(tableXPath).DataTable().destroy();
-		}
-		$(tableBodyXPath).html("");
-		$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
-		$(tableXPath).DataTable();
-		$(xpaths["applicationConfigurationContent"]).unblock();
-	};
-	
-	//Add/Edit
-	
-	var saveApplicationConfiguration=function(event) {
-		event.preventDefault();
-		if($(xpaths["saveApplicationConfigurationForm"]).validate()) {
-			$(xpaths["addOrEditApplicationConfigurationRecordModal"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			$(xpaths["applicationConfigurationContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			var saveApplicationConfigurationData=$(xpaths["saveApplicationConfigurationForm"]).serializeObject();
-			console.debug(saveApplicationConfigurationData);
-			apiHandling.processRequest("put", "/api/config/application", csrfToken, saveApplicationConfigurationData)
-				.done(data => saveApplicationConfiguration_success(data))
-				.catch(error => saveApplicationConfiguration_error(error,saveApplicationConfigurationData));
+		"record": {
+			"template": "#recordListTemplate",
+			"table": {
+				"table": "table#recordTable",
+				"body": "tbody#recordTableBody",
+				"header": "tr#recordTableHeader"
+			}
+		},
+		"modals": {
+			"delete": "div#deleteConfirmationModal",
+			"put": "div#putRecordModal"
+		},
+		"buttons": {
+			"confirmDelete": "button#confirmDeleteOperation",
+			"save": "button#saveRecord",
+			"edit": "button[id^='editRecordButton_']",
+			"delete": "button[id^='deleteRecordButton_']"
+		},
+		"forms": {
+			"put": "form#putRecordForm",
+			"delete" : "form#deleteRecordForm"
+		},
+		"elements" : {
+			"deleteRecordId" : "input#deleteRecordId",
+			"deleteRecordIdentifierDisplay": "span#deleteRecordIdentifierDisplay"
 		}
 	};
 	
-	var saveApplicationConfiguration_success=function(applicationConfiguration) {
-		console.debug(applicationConfiguration);
-		toastr.success("Application Configuration record saved.");
-		$(xpaths["addOrEditApplicationConfigurationRecordModal"]).unblock();
-		$(xpaths["addOrEditApplicationConfigurationRecordModal"]).modal("hide");
-		$(xpaths["saveApplicationConfigurationForm"])[0].reset();
-		getApplicationConfigurationList();
-	};
-	
-	var saveApplicationConfiguration_error=function(error,saveApplicationConfigurationData) {
-		$(xpaths["addOrEditApplicationConfigurationRecordModal"]).unblock();
-		$(xpaths["applicationConfigurationContent"]).unblock();
-		toastr.error("Configuration for '" + saveApplicationConfigurationData.applicationName + 
-		'-' + saveApplicationConfigurationData.moduleName + '-' + saveApplicationConfigurationData.subModuleName + "' already exists.");
-	}
-	
-	var showEditModal=function(event) {
+	/**
+	 *******************Delete Record************************* 
+	 */
+	var showDeleteConfimationModal=function(event) {
 		event.preventDefault();
-		var editButtonId=$(this).attr("id");
-		apiHandling.processRequest("get", "/api/config/application/" + editButtonId.split("_")[1], csrfToken, null)
-			.done(data => showEditModal_success(data))
-			.catch(error => console.debug(error));
+		logging.log("Showing delete modal");
+		var recordId=$(this).attr('id').split("_")[1];
+		logging.log("Record id: " + recordId);
+		$(xpaths.elements.deleteRecordId).val(recordId);
+		var recordIdentifier="";
+		$("td[id^='recordIdentifier_" + recordId + "_']").each(function() {
+			logging.log($(this).html());
+			if(recordIdentifier!="") {
+				recordIdentifier=recordIdentifier + " - ";				
+			}
+			recordIdentifier=recordIdentifier + $(this).html();
+		});
+		$(xpaths.elements.deleteRecordIdentifierDisplay).html(recordIdentifier);
+		$(xpaths.modals.delete).modal('show');
 	};
 	
-	var showEditModal_success=function(applicationConfigurationRecord) {
-		$("input#id").val(applicationConfigurationRecord.id);
-		$("input#application").val(applicationConfigurationRecord.applicationName);
-		$("input#module").val(applicationConfigurationRecord.moduleName);
-		$("input#subModule").val(applicationConfigurationRecord.subModuleName);
-		$("input#baseTestCaseCountFactor").val(applicationConfigurationRecord.baseTestCaseCountFactor);
-		$("input#complexity_" + applicationConfigurationRecord.complexityCode).attr("checked",true);
-		$(xpaths["addOrEditApplicationConfigurationRecordModal"]).modal("show");
-	};
-	
-	var getApplicationConfigurationId=function(rawId) {
-		console.debug(rawId);
-		var applicationConfigurationId={
-			"applicationName" : rawId.split("_")[1],
-			"moduleName" : rawId.split("_")[2],
-			"subModuleName" : rawId.split("_")[3]
-		};
-		return applicationConfigurationId;
-	};
-	
-	var resetAddRecordForm=function(event) {
+	var deleteRecord=function(event) {
 		event.preventDefault();
-		$("input#application").attr("disabled",false);
-		$("input#application").attr("readOnly",false);
-		$("input#module").attr("disabled",false);
-		$("input#module").attr("readOnly",false);
-		$("input#subModule").attr("disabled",false);
-		$("input#subModule").attr("readOnly",false);
-		$(xpaths["saveApplicationConfigurationForm"])[0].reset();
-		$(xpaths["addOrEditApplicationConfigurationRecordModal"]).modal("show");
+		logging.log("Deleting record");
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessing();
+		var deleteRequestBody=$(xpaths.forms.delete).serializeObject();
+		logging.log("Delete request: ")
+		logging.log(deleteRequestBody)
+		apiHandling.processRequest("delete", API_PATH, csrfToken,deleteRequestBody)
+			.done(data => deleteRecord_success(data))
+			.catch(error => deleteRecord_failure(error));
+	};
+	
+	var deleteRecord_success=function(data) {
+		logging.log(data);
+		var deletedRecordIdentifier=$(xpaths.elements.deleteRecordIdentifierDisplay).html();
+		$(xpaths.modals.delete).modal('hide');
+		toastr.success(RECORD_NAME + " " + deletedRecordIdentifier + " deleted successfully");
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessingCompleted();
+		loadRecords();
+	};
+	
+	var deleteRecord_failure=function(data) {
+		logging.log(data);
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessingCompleted();
+		processUnexpectedError(error);
 	};
 
+	/**
+	 *******************Edit Record***************************
+	 */
+
+	var showEditModal = function(event) {
+		event.preventDefault();
+		logging.log("Showing edit modal");
+		//indicate that request in progress
+		$(this).indicateButtonProcessing();
+		var recordId=$(this).attr('id').split("_")[1];
+		logging.log("Record id: " + recordId);
+		apiHandling.processRequest("get", API_PATH + "/" + recordId, csrfToken)
+			.done(data => showEditModal_success(data,$(this)))
+			.catch(error => showEditModal_failure(error,$(this)));
+	};
+	
+	var showEditModal_success=function(record,editButton) {
+		logging.log(record);
+		editButton.indicateButtonProcessingCompleted();
+		teh.updateEditForm(xpaths.forms.put,record);
+		$(xpaths.modals.put).modal('show');
+	};
+	
+	var showEditModal_failure=function(error,editButton) {
+		logging.log(error);
+		editButton.indicateButtonProcessingCompleted();
+		processUnexpectedError(error);
+	};
+
+	/**
+	 *******************Save Record****************************
+	 */
+	var saveRecord = function(event) {
+		event.preventDefault();
+		//indicate that saving is in progress
+		$(xpaths.forms.put).indicateButtonProcessing();
+		logging.log("Saving " + RECORD_NAME);
+		logging.log("Record to save is:");
+		//get save request body
+		var saveRequestBody = $(xpaths.forms.put).serializeObject();
+		logging.log(saveRequestBody);
+		apiHandling.processRequest("put", API_PATH, csrfToken, saveRequestBody)
+			.done(data => saveRecord_success(data))
+			.catch(error => saveRecord_failure(error));
+	};
+
+	var saveRecord_success = function(savedRecord) {
+		logging.log("Saved Record: ");
+		logging.log(savedRecord);
+		//indicate that saving is completed
+		$(xpaths.forms.put).indicateButtonProcessingCompleted();
+		//hide modal for put record
+		$(xpaths.modals.put).modal('hide');
+		//show success message
+		teh.showSaveSuccessMessage(RECORD_NAME, savedRecord.application + "-" + savedRecord.module + "-" + savedRecord.subModule);
+		loadRecords();
+	};
+
+	var saveRecord_failure = function(error) {
+		logging.log("Error: ");
+		logging.log(error);
+		//process errors to mark invalid fields
+		teh.processSaveApiErrors(error.responseJSON.details);
+		//indicate processing is completed
+		$(xpaths.forms.put).indicateButtonProcessingCompleted();
+	};
+
+	/**
+	 *******************Load Records*************************** 
+	 */
+
+	/**
+	 * loadRecords
+	 * Loads existing records
+	 */
+	var loadRecords = function() {
+		logging.log("Loading existing " + RECORD_NAME + " records!!!");
+		//indicate that loading process has started
+		$(xpaths.record.table.body).indicateTableLoading($(xpaths.record.table.header).children().length);
+		//call 'GET' method for record api
+		apiHandling.processRequest("get", API_PATH, csrfToken)
+			.done(data => loadRecords_success(data))
+			.catch(error => loadRecords_failure(error));
+	};
+
+	/**
+	 * loadRecords_success
+	 * execute when records are loaded through api call
+	 */
+	var loadRecords_success = function(records) {
+		logging.log(records);
+		//indicate that loading process is completed
+		$(xpaths.record.table.body).indicateTableLoadingCompleted();
+		//populate records in table and format the same as datatable
+		populateDataTable(records, xpaths.record.table.table, xpaths.record.table.body, xpaths.record.template);
+	};
+
+	/**
+	 * loadRecords_failure
+	 * executed when record loading has failed
+	 */
+	var loadRecords_failure = function(error) {
+		logging.log(error);
+		//indicate that loading process is completed
+		$(xpaths.record.table.body).indicateTableLoadingCompleted();
+		//show appropriate toast message
+		processUnexpectedError(error);
+	};
+
+	/**
+	 * Initialize module
+	 */
 	var init = function() {
-		$(xpaths["saveApplicationConfigurationButton"]).click(saveApplicationConfiguration);
-		$(xpaths["applicationConfigurationContent"]).on("click",xpaths["editApplicationConfigurationButtons"],showEditModal);
-		$(xpaths["applicationConfigurationContent"]).on("click",xpaths["deleteApplicationConfigurationButtons"],showDeleteModal);
-		$(xpaths["confirmDeleteApplicationConfigurationRecordButton"]).click(deleteApplicationConfigurationRecord);
-		
-		$("button#addApplicationConfigurationRecordButton").on("click",resetAddRecordForm);
-		
+		//enable or disable logging
+		logging.setLoggingSwitch(teh.shouldEnableLogging());
+		//get csrf token
 		csrfToken = $("input#csrf").val();
-		getApplicationConfigurationList();
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right",
-			"preventDuplicates": false,
-			"onclick": null,
-			"showDuration": "300",
-			"hideDuration": "1000",
-			"timeOut": "5000",
-			"extendedTimeOut": "1000",
-			"showEasing": "swing",
-			"hideEasing": "linear",
-			"showMethod": "fadeIn",
-			"hideMethod": "fadeOut"
-		}
+		//set toastr options
+		toastr.options = getToastrOptions();
+
+		//bind save function to put record submission event
+		$(xpaths.forms.put).submit(saveRecord);
+		//bind to modal dismiss event
+		$(xpaths.modals.put).on("hidden.bs.modal", function() {
+			teh.onModalDismiss(xpaths.forms.put);
+		});
+		//bind edit action
+		$(xpaths.record.table.body).on("click", xpaths.buttons.edit, showEditModal);
+		
+		//bind delete action
+		$(xpaths.record.table.body).on("click", xpaths.buttons.delete, showDeleteConfimationModal);
+		
+		//bind confirm delete action
+		$(xpaths.buttons.confirmDelete).click(deleteRecord);
+		
+		showDeleteConfimationModal
+		logging.log(RECORD_NAME + " module initialized!!!");
+
+		//load records
+		loadRecords();
 	};
 
 	return {

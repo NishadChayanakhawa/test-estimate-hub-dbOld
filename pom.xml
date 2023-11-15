@@ -26,6 +26,7 @@
 					<include>application.properties</include>
 					<include>banner.txt</include>
 					<include>templates/login.html</include>
+					<include>static/application/js/common/teh.js</include>
 				</includes>
 				<filtering>true</filtering>
 			</resource>
@@ -35,6 +36,7 @@
 					<exclude>application.properties</exclude>
 					<exclude>banner.txt</exclude>
 					<exclude>templates/login.html</exclude>
+					<exclude>static/application/js/common/teh.js</exclude>
 				</excludes>
 				<filtering>false</filtering>
 			</resource>

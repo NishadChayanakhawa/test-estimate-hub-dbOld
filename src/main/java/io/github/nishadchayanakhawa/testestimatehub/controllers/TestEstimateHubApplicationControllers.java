@@ -35,6 +35,11 @@ public class TestEstimateHubApplicationControllers {
 		return "configuration/general";
 	}
 	
+	@GetMapping("/configuration/application")
+	public String getApplicationConfigurationPage() {
+		return "configuration/application";
+	}
+	
 	@GetMapping("/release")
 	public String getReleaseRecordManagementPage() {
 		return "record/release";
