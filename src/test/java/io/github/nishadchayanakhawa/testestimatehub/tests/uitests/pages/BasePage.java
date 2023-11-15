@@ -23,6 +23,9 @@ public class BasePage extends ApplicationActions {
 	@FindBy(xpath="//*[@id=\"userManagementOption\"]")
 	WebElement userManagementOption;
 	
+	@FindBy(xpath="//*[@id=\"applicationConfigurationOption\"]")
+	WebElement applicationConfigurationOption;
+	
 	@FindBy(xpath="//*[@id=\"releaseRecordOption\"]")
 	WebElement releaseRecordOption;
 	
@@ -95,6 +98,13 @@ public class BasePage extends ApplicationActions {
 		this.clickElement(configurationLink);
 		this.clickElement(generalConfigurationOption);
 		return new GeneralConfigurationPage(this.driver);
+	}
+	
+	public ApplicationConfigurationPage navigateToApplicationConfiguration() {
+		this.clickNavbarTogglerIfAvailable();
+		this.clickElement(configurationLink);
+		this.clickElement(applicationConfigurationOption);
+		return new ApplicationConfigurationPage(this.driver);
 	}
 	
 	public ReleaseManagementPage navigateToReleaseManagement() {

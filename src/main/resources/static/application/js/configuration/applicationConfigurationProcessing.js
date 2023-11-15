@@ -73,7 +73,7 @@ var applicationConfigurationProcessing = (function() {
 		logging.log(data);
 		var deletedRecordIdentifier=$(xpaths.elements.deleteRecordIdentifierDisplay).html();
 		$(xpaths.modals.delete).modal('hide');
-		toastr.success(RECORD_NAME + " " + deletedRecordIdentifier + " deleted successfully");
+		toastr.success(RECORD_NAME + " '" + deletedRecordIdentifier + "' deleted successfully");
 		$(xpaths.buttons.confirmDelete).indicateButtonProcessingCompleted();
 		loadRecords();
 	};
