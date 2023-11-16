@@ -13,11 +13,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import io.github.nishadchayanakhawa.testestimatehub.repositories.ChangeRepository;
+import io.github.nishadchayanakhawa.testestimatehub.repositories.RequirementRepository;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.DuplicateEntityException;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.TransactionException;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.ChangeDTO;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.ReleaseDTO;
+import io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO;
 import io.github.nishadchayanakhawa.testestimatehub.model.Change;
+import io.github.nishadchayanakhawa.testestimatehub.model.Requirement;
 
 /**
  * <b>Class Name</b>: ChangeService<br>
@@ -36,13 +39,17 @@ public class ChangeService {
 
 	private ReleaseService releaseService;
 
+	private RequirementRepository requirementRepository;
+
 	// model mapper
 	private ModelMapper modelMapper;
 
 	@Autowired
-	public ChangeService(ChangeRepository changeRepository, ReleaseService releaseService, ModelMapper modelMapper) {
+	public ChangeService(ChangeRepository changeRepository, ReleaseService releaseService,
+			RequirementRepository requirementRepository, ModelMapper modelMapper) {
 		this.changeRepository = changeRepository;
 		this.releaseService = releaseService;
+		this.requirementRepository = requirementRepository;
 		this.modelMapper = modelMapper;
 	}
 
@@ -65,7 +72,7 @@ public class ChangeService {
 				|| changeToSaveDTO.getEndDate().isAfter(release.getEndDate())) {
 			throw new TransactionException("startDate-endDate do not align with selected release start and end dates");
 		}
-		if(changeToSaveDTO.getEndDate().isBefore(changeToSaveDTO.getStartDate())) {
+		if (changeToSaveDTO.getEndDate().isBefore(changeToSaveDTO.getStartDate())) {
 			throw new TransactionException("startDate-endDate are incorrect. Start date cannot be before end date");
 		}
 		try {
@@ -143,5 +150,50 @@ public class ChangeService {
 		logger.debug("Deleting change for id: {}", id);
 		this.changeRepository.deleteById(id);
 		logger.debug("Deleted change successfully.");
+	}
+	
+	/**
+	 * <b>Method Name</b>: getRequirement<br>
+	 * <b>Description</b>: Get requirement by id<br>
+	 * @param id id as {@link java.lang.Long Long}
+	 * @return requirement as 
+	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
+	 */
+	public RequirementDTO getRequirement(Long id) {
+		logger.debug("Looking up requirement with id: {}", id);
+		RequirementDTO requirement = modelMapper.map(this.requirementRepository.findById(id).orElseThrow(),
+				RequirementDTO.class);
+		logger.debug("Requirement located: {}", requirement);
+		return requirement;
+	}
+
+	/**
+	 * <b>Method Name</b>: saveUseCases<br>
+	 * <b>Description</b>: Save use cases.<br>
+	 * @param requirementWithUseCasesToSave as 
+	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
+	 * @return requirement with saved use cases as 
+	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
+	 */
+	public RequirementDTO saveUseCases(RequirementDTO requirementWithUseCasesToSave) {
+		logger.debug("Saving use cases within requirement: {}", requirementWithUseCasesToSave);
+		//get original requirement
+		RequirementDTO originalRequirement = this.getRequirement(requirementWithUseCasesToSave.getId());
+		//set use cases
+		originalRequirement.setUseCases(requirementWithUseCasesToSave.getUseCases());
+
+		//set requirement id if it doesnt exist
+		originalRequirement.getUseCases().stream().forEach(useCase -> {
+			if (useCase.getRequirementId() == null) {
+				useCase.setRequirementId(originalRequirement.getId());
+			}
+		});
+
+		//save requirement with attached use cases
+		RequirementDTO savedRequirementWithUseCases = modelMapper.map(
+				this.requirementRepository.save(modelMapper.map(originalRequirement, Requirement.class)),
+				RequirementDTO.class);
+		logger.debug("Saved use cases within requirement: {}", savedRequirementWithUseCases);
+		return savedRequirementWithUseCases;
 	}
 }

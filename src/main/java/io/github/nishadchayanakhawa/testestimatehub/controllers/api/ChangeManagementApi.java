@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 //constants, models and services
 import io.github.nishadchayanakhawa.testestimatehub.configurations.TestEstimateHubConstants;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.ChangeDTO;
+import io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO;
 import io.github.nishadchayanakhawa.testestimatehub.services.ChangeService;
 
 /**
@@ -65,6 +66,14 @@ public class ChangeManagementApi {
 		// save entity
 		return new ResponseEntity<>(this.changeService.save(changeToSave), status);
 	}
+	
+	@PutMapping(value="/useCases",consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<RequirementDTO> save(@RequestBody RequirementDTO requirementToSave) {
+		logger.debug(TestEstimateHubConstants.SERVING_REQUEST_DEBUG_MESSAGE, "PUT",
+				TestEstimateHubConstants.CHANGE_MANAGEMENT_API + "/useCases");
+		// save entity
+		return new ResponseEntity<>(this.changeService.saveUseCases(requirementToSave), HttpStatus.OK);
+	}
 
 	/**
 	 * <b>Method Name</b>: getChange<br>
@@ -81,6 +90,14 @@ public class ChangeManagementApi {
 				TestEstimateHubConstants.CHANGE_MANAGEMENT_API, id);
 		// return test type record
 		return new ResponseEntity<>(this.changeService.get(id), HttpStatus.OK);
+	}
+	
+	@GetMapping(path = "/requirement/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<RequirementDTO> getRequirement(@PathVariable Long id) {
+		logger.debug(TestEstimateHubConstants.SERVING_GET_REQUEST_DEBUG_MESSAGE, "GET",
+				TestEstimateHubConstants.CHANGE_MANAGEMENT_API + "/requirement", id);
+		// return test type record
+		return new ResponseEntity<>(this.changeService.getRequirement(id), HttpStatus.OK);
 	}
 
 	/**

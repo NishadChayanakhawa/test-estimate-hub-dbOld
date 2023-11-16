@@ -1,10 +1,16 @@
 package io.github.nishadchayanakhawa.testestimatehub.model;
 
+import java.util.Set;
+import java.util.HashSet;
+import jakarta.persistence.CascadeType;
 //jpa
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 //jpa validations
@@ -14,7 +20,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 //java utils
-
 
 /**
  * <b>Class Name</b>: Requirement<br>
@@ -49,4 +54,9 @@ public class Requirement {
 	@Column(nullable = false)
 	@NotBlank(message = "summary {required.message}")
 	private String summary;
+
+	// use cases
+	@OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+	@JoinColumn(name = "OWNER_REQUIREMENT_ID", referencedColumnName = "REQUIREMENT_ID")
+	Set<UseCase> useCases = new HashSet<>();
 }

@@ -18,7 +18,7 @@ Feature: Test type configuration tests
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "TestType/updateTestType.json"
 		And In request body template, replace "\"${id}\"" with value of variable "addedTestTypeId"
-		And In request body template, replace "${name}" with "System Integration Test"
+		And In request body template, replace "${name}" with "UAT"
 		When PUT request is submitted to "http://localhost:8999/api/configuration/testType"
 		Then Response status code should be 200
 		
