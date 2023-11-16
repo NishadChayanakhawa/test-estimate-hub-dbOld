@@ -33,7 +33,7 @@ Feature: Release management tests
 		When GET request is submitted to "http://localhost:8999/api/release"
 		Then Response status code should be 200
 		
-	Scenario: Delete change type
+	Scenario: Delete release
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Release/delete.json"
 		And In request body template, replace "\"${id}\"" with value of variable "addedReleaseId"

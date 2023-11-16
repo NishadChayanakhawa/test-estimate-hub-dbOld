@@ -1,253 +1,296 @@
 var changeProcessing = (function() {
+	//csrf token
 	var csrfToken;
+	//api path
+	const API_PATH = "/api/change";
+	//record name
+	const RECORD_NAME = "Change";
+	//requirement record id
+	var requirementRecordId;
+
+	//common xpaths
 	var xpaths = {
-		"changeContent" : "div#changeContent",
-		"addOrEditChangeRecordModal" : "#addOrEditChangeRecordModal",
-		"changeRecordListPlaceholder" : "#changeRecordListPlaceholder",
-		"saveChangeButton" : "button#saveChange",
-		"saveChangeForm" : "form#saveChangeForm",
-		"changeRecordTable" : "table#changeRecordTable",
-		"changeRecordTableBody" : "tbody#changeRecordTableBody",
-		"changeRecordListTemplate" : "#changeRecordListTemplate",
-		"editChangeButtons" : "button[id^='editChange_']",
-		"deleteChangeButtons" : "button[id^='deleteChange_']",
-		"deleteUserConfirmationModal" : "div#deleteUserConfirmationModal",
-		"confirmDeleteChangeRecordButton" : "button#confirmDeleteChangeRecord",
-		"deleteChangeDeleteForm" : "form#deleteChangeDeleteForm",
-		"startDate" : "input#startDate",
-		"endDate" : "input#endDate",
-		"calculateEstimationButton" : "button#calculateEstimationButton",
-		"calculateEstimationForm" : "form#calculateEstimationForm",
-		"addRequirementButton" : "button#addRequirementButton",
-		"requirementFormTemplate" : "#requirementFormTemplate",
-		"requirementFormsTableBody" : "tbody#requirementFormsTableBody",
-		"deleteRequirementButtons" : "button[id^='deleteRequirement_']",
-		"requirementForms" : "tr[id^='requirementForm_']"
+		"record": {
+			"template": "#recordListTemplate",
+			"table": {
+				"table": "table#recordTable",
+				"body": "tbody#recordTableBody",
+				"header": "tr#recordTableHeader"
+			}
+		},
+		"modals": {
+			"delete": "div#deleteConfirmationModal",
+			"put": "div#putRecordModal"
+		},
+		"buttons": {
+			"confirmDelete": "button#confirmDeleteOperation",
+			"save": "button#saveRecord",
+			"edit": "button[id^='editRecordButton_']",
+			"delete": "button[id^='deleteRecordButton_']"
+		},
+		"forms": {
+			"put": "form#putRecordForm",
+			"delete" : "form#deleteRecordForm"
+		},
+		"elements" : {
+			"deleteRecordId" : "input#deleteRecordId",
+			"deleteRecordIdentifierDisplay": "span#deleteRecordIdentifierDisplay"
+		}
 	};
 	
-	var requirementIdData={
-		'id' : 1
+	/**
+	 * Add/remove requirement form
+	 */
+	
+	var addRequirementForm=function(event) {
+		event.preventDefault();
+		logging.log("Adding requirement form!!!");
+		requirementRecordId=requirementRecordId+1;
+		var requirementRecordAddFormRequest={
+			"id" : requirementRecordId
+		};
+		$("#requirementFormTemplate").tmpl(requirementRecordAddFormRequest).appendTo("#requirementFormsTableBody");
 	};
 	
 	var deleteRequirementForm=function(event) {
 		event.preventDefault();
-		console.debug("deleting Requirement");
-		$("tr#requirementForm_" + $(this).attr("id").split("_")[1]).remove();
+		logging.log("Deleting requirement form!!!");
+		var requirementFormId=$(this).attr('id').split("_")[1];
+		logging.log("Requirement id:" + requirementFormId);
+		$("tr#requirementForm_" + requirementFormId).remove();
 	};
 	
-	var addRequirementForm=function(event) {
+	/**
+	 *******************Delete Record************************* 
+	 */
+	var showDeleteConfimationModal=function(event) {
 		event.preventDefault();
-		console.debug("addingRequirement");
-		requirementIdData['id']=requirementIdData['id']+1;
-		console.debug(requirementIdData);
-		$(xpaths["requirementFormTemplate"]).tmpl(requirementIdData).appendTo($(xpaths["requirementFormsTableBody"]));
-	};
-	
-	var updateChangeEndDateMinValue=function(event) {
-		event.preventDefault();
-		var startDateSelected=$(xpaths["startDate"]).val().split("-");
-		var formattedStartDate=new Date(startDateSelected[0],startDateSelected[1]-1,startDateSelected[2]);
-		console.debug();
-		$(xpaths["endDate"]).val("");
-		$(xpaths["endDate"]).datepicker("destroy");
-		$(xpaths["endDate"]).datepicker({
-			dateFormat: "yy-mm-dd",
-			minDate: formattedStartDate
-		});
-	};
-
-	//DELETE Process
-	
-	var showDeleteModal=function(event) {
-		event.preventDefault();
-		var deleteButtonId=$(this).attr("id");
-		var changeId=deleteButtonId.split("_")[1];
-		$("input#deleteAction_id").val(changeId);
-		$(xpaths["deleteUserConfirmationModal"]).modal("show");
-	};
-	
-	var deleteChangeRecord=function(event) {
-		event.preventDefault();
-		$(xpaths["deleteUserConfirmationModal"]).modal("hide");
-		$(xpaths["changeContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Deleting record...</h5>' });
-		var changeId=$(xpaths["deleteChangeDeleteForm"]).serializeObject();
-		apiHandling.processRequest("delete", "/api/change", csrfToken, changeId)
-			.done(data => deleteChangeRecord_success(data))
-			.catch(error => console.debug(error));
-	}
-	
-	var deleteChangeRecord_success=function(data) {
-		$(xpaths["changeContent"]).unblock();
-		getChangeList();
-	};
-	
-	//Load List
-	
-	var getChangeList = function() {
-		//event.preventDefault();
-		$(xpaths["changeRecordTableBody"]).html($(xpaths["ChangeRecordListPlaceholder"]).html());
-		$(xpaths["changeContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Just a moment...</h5>' });
-		apiHandling.processRequest("get", "/api/change", csrfToken, null)
-			.done(data => getChangeList_success(data))
-			.catch(error => console.debug(error));
-	};
-
-	var getChangeList_success = function(changeRecords) {
-		console.debug(changeRecords);
-		populateDataTable(changeRecords,
-			xpaths["changeRecordTable"],
-			xpaths["changeRecordTableBody"],
-			xpaths["changeRecordListTemplate"]);
-		$(xpaths["changeContent"]).unblock();
-	};
-	
-	var populateDataTable=function(data,tableXPath,tableBodyXPath,templateXPath) {
-		if($.fn.DataTable.isDataTable(tableXPath)) {
-			$(tableXPath).DataTable().destroy();
-		}
-		$(tableBodyXPath).html("");
-		$(templateXPath).tmpl(data).appendTo(tableBodyXPath);
-		$(tableXPath).DataTable();
-		$(xpaths["ChangeContent"]).unblock();
-	};
-	
-	//Add/Edit
-	
-	var saveChange=function(event) {
-		event.preventDefault();
-		console.debug("Saving Change");
-		var changeData=$(xpaths["saveChangeForm"]).serializeObject();
-		changeData['requirements']=[];
-		console.debug(changeData);
-		$(xpaths["requirementForms"]).each(function() {
-			console.debug($(this).attr('id'));
-			var requirementData=$(this).serializeObject()
-			changeData['requirements'].push(requirementData);
-			console.debug(changeData);
-		})
-		changeData['identifier']=$("input#changeIdentifier").val();
-		changeData['id']=$("input#id").val();
-		delete changeData['complexityCode'];
-		delete changeData['description'];
-		if($(xpaths["saveChangeForm"]).validate()) {
-			$(xpaths["addOrEditChangeRecordModal"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			$(xpaths["changeContent"]).block({ message: '<h5><i class="fa-solid fa-spinner fa-spin"></i> Adding/updating record...</h5>' });
-			console.debug(changeData);
-			apiHandling.processRequest("put", "/api/change", csrfToken, changeData)
-				.done(data => saveChange_success(data))
-				.catch(error => saveChange_failure(error,changeData));
-		}
-	};
-	
-	var saveChange_success=function(Change) {
-		console.debug(Change);
-		toastr.success("Change Type Configuration record saved.");
-		$(xpaths["saveChangeForm"])[0].reset();
-		$(xpaths["addOrEditChangeRecordModal"]).unblock();
-		$(xpaths["addOrEditChangeRecordModal"]).modal("hide");
-		getChangeList();
-	};
-	
-	var saveChange_failure=function(error,saveChangeData) {
-		console.debug("here");
-		console.debug(error);
-		toastr.error("Functionality name '" + saveChangeData.name + "' already exists.");
-		$(xpaths["addOrEditChangeRecordModal"]).unblock();
-		$(xpaths["changeContent"]).unblock();
-		console.debug("here as well");
-	};
-	
-	var showEditModal=function(event) {
-		event.preventDefault();
-		var editButtonId=$(this).attr("id");
-		var changeId=editButtonId.split("_")[1];
-		apiHandling.processRequest("get", "/api/change/" + changeId, csrfToken, null)
-			.done(data => showEditModal_success(data))
-			.catch(error => console.debug(error));
-	};
-	
-	var showEditModal_success=function(changeRecord) {
-		resetAddRecordForm();
-		$("input#id").val(changeRecord.id);
-		$("input#status").val(changeRecord.statusCode);
-		$("select#releaseId").val(changeRecord.releaseId);
-		$("input#changeIdentifier").val(changeRecord.identifier);
-		$("input#changeName").val(changeRecord.name);
-		$("select#changeTypeId").val(changeRecord.changeTypeId);
-		$("input#startDate").val(changeRecord.startDate);
-		$("input#endDate").val(changeRecord.endDate);
-		
-		$(changeRecord.requirements).each(function(i,requirement) {
-			if(i>0) {
-				$(xpaths["addRequirementButton"]).click();
+		logging.log("Showing delete modal");
+		var recordId=$(this).attr('id').split("_")[1];
+		logging.log("Record id: " + recordId);
+		$(xpaths.elements.deleteRecordId).val(recordId);
+		var recordIdentifier="";
+		$("td[id^='recordIdentifier_" + recordId + "_']").each(function() {
+			logging.log($(this).html());
+			if(recordIdentifier!="") {
+				recordIdentifier=recordIdentifier + " - ";				
 			}
-			$("input#id_" + (i+1)).val(requirement.id);
-			$("input#identifier_" + (i+1)).val(requirement.identifier);
-			$("input#description_" + (i+1)).val(requirement.description);
-			$("select#complexityCode_" + (i+1)).val(requirement.complexityCode);
-			console.debug(requirement);
+			recordIdentifier=recordIdentifier + $(this).html();
 		});
-		
-		$("input#identifier").val(changeRecord.identifier);
-		$("input#name").val(changeRecord.name);
-		$(xpaths["addOrEditChangeRecordModal"]).modal("show");
+		$(xpaths.elements.deleteRecordIdentifierDisplay).html(recordIdentifier);
+		$(xpaths.modals.delete).modal('show');
 	};
 	
-	var resetAddRecordForm=function(event) {
-		if(event!=null) {
-			event.preventDefault();	
-		}
-		$("input#id").val(null);
-		$(xpaths["saveChangeForm"])[0].reset();
-		$("tr[id^='requirementForm_']").not("tr#requirementForm_1").remove();
-		requirementIdData['id']=1;
-		$("input#status").val("CREATED");
-		$(xpaths["addOrEditChangeRecordModal"]).modal("show");
+	var deleteRecord=function(event) {
+		event.preventDefault();
+		logging.log("Deleting record");
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessing();
+		var deleteRequestBody=$(xpaths.forms.delete).serializeObject();
+		logging.log("Delete request: ")
+		logging.log(deleteRequestBody)
+		apiHandling.processRequest("delete", API_PATH, csrfToken,deleteRequestBody)
+			.done(data => deleteRecord_success(data))
+			.catch(error => deleteRecord_failure(error));
+	};
+	
+	var deleteRecord_success=function(data) {
+		logging.log(data);
+		var deletedRecordIdentifier=$(xpaths.elements.deleteRecordIdentifierDisplay).html();
+		$(xpaths.modals.delete).modal('hide');
+		toastr.success(RECORD_NAME + " '" + deletedRecordIdentifier + "' deleted successfully");
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessingCompleted();
+		loadRecords();
+	};
+	
+	var deleteRecord_failure=function(data) {
+		logging.log(data);
+		$(xpaths.buttons.confirmDelete).indicateButtonProcessingCompleted();
+		processUnexpectedError(error);
 	};
 
+	/**
+	 *******************Edit Record***************************
+	 */
+
+	var showEditModal = function(event) {
+		event.preventDefault();
+		logging.log("Showing edit modal");
+		//indicate that request in progress
+		$(this).indicateButtonProcessing();
+		var recordId=$(this).attr('id').split("_")[1];
+		logging.log("Record id: " + recordId);
+		apiHandling.processRequest("get", API_PATH + "/" + recordId, csrfToken)
+			.done(data => showEditModal_success(data,$(this)))
+			.catch(error => showEditModal_failure(error,$(this)));
+	};
+	
+	var showEditModal_success=function(record,editButton) {
+		logging.log(record);
+		editButton.indicateButtonProcessingCompleted();
+		teh.updateEditForm(xpaths.forms.put,record);
+		$.each(record.impactedArea,function(i,applicationConfiguration) {
+			logging.log("Impacted area: " + i + ":" + applicationConfiguration.id);
+			$("#impactedArea > option[value=" + applicationConfiguration.id + "]").attr("selected",'selected');
+		});
+		$.each(record.requirements,function(i,requirement) {
+			logging.log("Requirement: " + i + ":" + requirement.id);
+			if(i>0) {
+				$("#addRequirementButton").click();
+			}
+			$("#id_" + (i+1)).val(requirement.id);
+			$("#changeId_" + (i+1)).val(requirement.changeId);
+			$("#identifier_" + (i+1)).val(requirement.identifier);
+			$("#summary_" + (i+1)).val(requirement.summary);
+		});
+		$(xpaths.modals.put).modal('show');
+	};
+	
+	var showEditModal_failure=function(error,editButton) {
+		logging.log(error);
+		editButton.indicateButtonProcessingCompleted();
+		processUnexpectedError(error);
+	};
+
+	/**
+	 *******************Save Record****************************
+	 */
+	var saveRecord = function(event) {
+		event.preventDefault();
+		//indicate that saving is in progress
+		$(xpaths.forms.put).indicateButtonProcessing();
+		logging.log("Saving " + RECORD_NAME);
+		logging.log("Record to save is:");
+		//get save request body
+		var saveRequestBody = $(xpaths.forms.put).serializeObject();
+		//custom code
+		saveRequestBody.impactedArea=[];
+		$.each($("#impactedArea").val(),function(i,value) {
+			logging.log(i + ":" + value);
+			var impact={
+				"id" : value
+			};
+			saveRequestBody.impactedArea.push(impact);
+		});
+		saveRequestBody.requirements=[];
+		$("tr[id^='requirementForm_']").each(function() {
+			var requirement=$(this).serializeObject();
+			saveRequestBody.requirements.push(requirement);
+		});
+		
+		saveRequestBody.id=saveRequestBody.id[0];
+		saveRequestBody.identifier=saveRequestBody.identifier[0];
+		saveRequestBody.summary=saveRequestBody.summary[0];
+		
+		
+		logging.log(saveRequestBody);
+		apiHandling.processRequest("put", API_PATH, csrfToken, saveRequestBody)
+			.done(data => saveRecord_success(data))
+			.catch(error => saveRecord_failure(error));
+	};
+
+	var saveRecord_success = function(savedRecord) {
+		logging.log("Saved Record: ");
+		logging.log(savedRecord);
+		//indicate that saving is completed
+		$(xpaths.forms.put).indicateButtonProcessingCompleted();
+		//hide modal for put record
+		$(xpaths.modals.put).modal('hide');
+		//show success message
+		teh.showSaveSuccessMessage(RECORD_NAME, savedRecord.identifier);
+		loadRecords();
+	};
+
+	var saveRecord_failure = function(error) {
+		logging.log("Error: ");
+		logging.log(error);
+		//process errors to mark invalid fields
+		teh.processSaveApiErrors(error.responseJSON.details);
+		//indicate processing is completed
+		$(xpaths.forms.put).indicateButtonProcessingCompleted();
+	};
+
+	/**
+	 *******************Load Records*************************** 
+	 */
+
+	/**
+	 * loadRecords
+	 * Loads existing records
+	 */
+	var loadRecords = function() {
+		logging.log("Loading existing " + RECORD_NAME + " records!!!");
+		//indicate that loading process has started
+		$(xpaths.record.table.body).indicateTableLoading($(xpaths.record.table.header).children().length);
+		//call 'GET' method for record api
+		apiHandling.processRequest("get", API_PATH, csrfToken)
+			.done(data => loadRecords_success(data))
+			.catch(error => loadRecords_failure(error));
+	};
+
+	/**
+	 * loadRecords_success
+	 * execute when records are loaded through api call
+	 */
+	var loadRecords_success = function(records) {
+		logging.log(records);
+		//indicate that loading process is completed
+		$(xpaths.record.table.body).indicateTableLoadingCompleted();
+		//populate records in table and format the same as datatable
+		populateDataTable(records, xpaths.record.table.table, xpaths.record.table.body, xpaths.record.template);
+	};
+
+	/**
+	 * loadRecords_failure
+	 * executed when record loading has failed
+	 */
+	var loadRecords_failure = function(error) {
+		logging.log(error);
+		//indicate that loading process is completed
+		$(xpaths.record.table.body).indicateTableLoadingCompleted();
+		//show appropriate toast message
+		processUnexpectedError(error);
+	};
+
+	/**
+	 * Initialize module
+	 */
 	var init = function() {
-		//$(xpaths["saveChangeButton"]).click(saveChange);
-		$(xpaths["saveChangeForm"]).submit(saveChange);
-		$(xpaths["saveChangeButton"]).click(saveChange);
-		$(xpaths["requirementFormsTableBody"]).on("submit",xpaths["requirementForms"],saveChange);
-		
-		$(xpaths["changeContent"]).on("click",xpaths["editChangeButtons"],showEditModal);
-		$(xpaths["changeContent"]).on("click",xpaths["deleteChangeButtons"],showDeleteModal);
-		$(xpaths["confirmDeleteChangeRecordButton"]).click(deleteChangeRecord);
-		
-		$("button#addChangeRecordButton").on("click",resetAddRecordForm);
-		
-		$(xpaths["addRequirementButton"]).click(addRequirementForm);
-		$(xpaths["requirementFormsTableBody"]).on("click",xpaths["deleteRequirementButtons"],deleteRequirementForm);
-		
-		$(xpaths["startDate"]).datepicker({
-			dateFormat: "yy-mm-dd"
-		});
-		$(xpaths["endDate"]).datepicker({
-			dateFormat: "yy-mm-dd"
-		});
-		$(xpaths["startDate"]).change(updateChangeEndDateMinValue);
-		//$(xpaths["calculateEstimationForm"]).submit(calculateEstimation);
-		
+		//enable or disable logging
+		logging.setLoggingSwitch(teh.shouldEnableLogging());
+		//get csrf token
 		csrfToken = $("input#csrf").val();
-		getChangeList();
-		toastr.options = {
-			"closeButton": true,
-			"debug": false,
-			"newestOnTop": true,
-			"progressBar": true,
-			"positionClass": "toast-top-right",
-			"preventDuplicates": false,
-			"onclick": null,
-			"showDuration": "300",
-			"hideDuration": "1000",
-			"timeOut": "5000",
-			"extendedTimeOut": "1000",
-			"showEasing": "swing",
-			"hideEasing": "linear",
-			"showMethod": "fadeIn",
-			"hideMethod": "fadeOut"
-		}
+		//set toastr options
+		toastr.options = getToastrOptions();
+		//initialize requirement id to 1
+		requirementRecordId=1;
+
+		//bind save function to put record submission event
+		$(xpaths.forms.put).submit(saveRecord);
+		//bind to modal dismiss event
+		$(xpaths.modals.put).on("hidden.bs.modal", function() {
+			teh.onModalDismiss(xpaths.forms.put);
+			$("#impactedArea > option").removeAttr("selected");
+			$("tr[id^='requirementForm_']:not(tr#requirementForm_1)").remove();
+			requirementRecordId=1;
+			$("#id_1").val('');
+			$("#changeId_1").val('');
+		});
+		//bind edit action
+		$(xpaths.record.table.body).on("click", xpaths.buttons.edit, showEditModal);
+		
+		//bind delete action
+		$(xpaths.record.table.body).on("click", xpaths.buttons.delete, showDeleteConfimationModal);
+		
+		//bind confirm delete action
+		$(xpaths.buttons.confirmDelete).click(deleteRecord);
+		
+		$("#requirementFormsTableBody").on('click',"button[id^='deleteRequirement_']",deleteRequirementForm)
+		
+		$("#addRequirementButton").click(addRequirementForm);
+		logging.log(RECORD_NAME + " module initialized!!!");
+
+		//load records
+		loadRecords();
 	};
 
 	return {

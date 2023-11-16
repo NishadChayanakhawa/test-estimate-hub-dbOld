@@ -1,0 +1,24 @@
+{
+	"id" : "${id}",
+	"identifier" : "IL",
+	"releaseId" : "${releaseId}",
+	"summary" : "Intelli Dashboard Updated",
+	"changeTypeId" : "${changeTypeId}",
+	"startDate" : "2023-11-01",
+	"endDate" : "2023-11-08",
+	"requirements" : [
+		{
+			"identifier" : "BN01",
+			"summary" : "User Management"
+		},
+		{
+			"identifier" : "BN03",
+			"summary" : "Change Type Management"
+		}
+	],
+	"impactedArea" : [
+		{
+			"id" : "${applicationConfigurationId}"
+		}
+	] 
+}
