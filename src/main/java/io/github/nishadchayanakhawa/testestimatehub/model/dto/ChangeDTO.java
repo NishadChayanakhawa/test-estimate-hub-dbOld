@@ -30,6 +30,7 @@ public class ChangeDTO {
 	private Long releaseId;
 	// release identifier
 	private String releaseIdentifier;
+	private String releaseName;
 	// change identifier
 	private String identifier;
 	// change summary

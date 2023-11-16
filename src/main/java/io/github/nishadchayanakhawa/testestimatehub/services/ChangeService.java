@@ -77,6 +77,14 @@ public class ChangeService {
 		}
 		try {
 			// save change record
+			if (changeToSaveDTO.getId() != null) {
+				ChangeDTO existingChangeDTO = this.get(changeToSaveDTO.getId());
+				existingChangeDTO.getRequirements().stream().forEach(requirement -> {
+					changeToSaveDTO.getRequirements().stream()
+							.filter(existingRequirement -> existingRequirement.getId() == requirement.getId())
+							.findFirst().get().setUseCases(requirement.getUseCases());
+				});
+			}
 			ChangeDTO savedChangeDTO = modelMapper
 					.map(this.changeRepository.save(modelMapper.map(changeToSaveDTO, Change.class)), ChangeDTO.class);
 			logger.debug("Saved change : {}", savedChangeDTO);
@@ -151,13 +159,15 @@ public class ChangeService {
 		this.changeRepository.deleteById(id);
 		logger.debug("Deleted change successfully.");
 	}
-	
+
 	/**
 	 * <b>Method Name</b>: getRequirement<br>
 	 * <b>Description</b>: Get requirement by id<br>
+	 * 
 	 * @param id id as {@link java.lang.Long Long}
-	 * @return requirement as 
-	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
+	 * @return requirement as
+	 *         {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO
+	 *         RequirementDTO}
 	 */
 	public RequirementDTO getRequirement(Long id) {
 		logger.debug("Looking up requirement with id: {}", id);
@@ -170,26 +180,29 @@ public class ChangeService {
 	/**
 	 * <b>Method Name</b>: saveUseCases<br>
 	 * <b>Description</b>: Save use cases.<br>
-	 * @param requirementWithUseCasesToSave as 
-	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
-	 * @return requirement with saved use cases as 
-	 * {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO RequirementDTO}
+	 * 
+	 * @param requirementWithUseCasesToSave as
+	 *                                      {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO
+	 *                                      RequirementDTO}
+	 * @return requirement with saved use cases as
+	 *         {@link io.github.nishadchayanakhawa.testestimatehub.model.dto.RequirementDTO
+	 *         RequirementDTO}
 	 */
 	public RequirementDTO saveUseCases(RequirementDTO requirementWithUseCasesToSave) {
 		logger.debug("Saving use cases within requirement: {}", requirementWithUseCasesToSave);
-		//get original requirement
+		// get original requirement
 		RequirementDTO originalRequirement = this.getRequirement(requirementWithUseCasesToSave.getId());
-		//set use cases
+		// set use cases
 		originalRequirement.setUseCases(requirementWithUseCasesToSave.getUseCases());
 
-		//set requirement id if it doesnt exist
+		// set requirement id if it doesnt exist
 		originalRequirement.getUseCases().stream().forEach(useCase -> {
 			if (useCase.getRequirementId() == null) {
 				useCase.setRequirementId(originalRequirement.getId());
 			}
 		});
 
-		//save requirement with attached use cases
+		// save requirement with attached use cases
 		RequirementDTO savedRequirementWithUseCases = modelMapper.map(
 				this.requirementRepository.save(modelMapper.map(originalRequirement, Requirement.class)),
 				RequirementDTO.class);

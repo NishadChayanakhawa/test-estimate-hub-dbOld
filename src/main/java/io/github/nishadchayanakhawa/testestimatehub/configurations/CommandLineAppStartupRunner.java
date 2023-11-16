@@ -1,12 +1,16 @@
 package io.github.nishadchayanakhawa.testestimatehub.configurations;
 
+import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 //logger
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -16,25 +20,45 @@ import io.github.nishadchayanakhawa.testestimatehub.model.dto.UserDTO;
 import io.github.nishadchayanakhawa.testestimatehub.model.dto.GeneralConfigurationDTO;
 import io.github.nishadchayanakhawa.testestimatehub.services.GeneralConfigurationService;
 import io.github.nishadchayanakhawa.testestimatehub.services.UserService;
+import io.github.nishadchayanakhawa.testestimatehub.services.TestTypeService;
+import io.github.nishadchayanakhawa.testestimatehub.services.ChangeTypeService;
+import io.github.nishadchayanakhawa.testestimatehub.services.ApplicationConfigurationService;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.EntityNotFoundException;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.TestEstimateHubExceptions;
 
+import com.fasterxml.jackson.core.exc.StreamReadException;
+import com.fasterxml.jackson.databind.DatabindException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 @Component
 @Profile("!dev")
 public class CommandLineAppStartupRunner implements CommandLineRunner {
 	private static final ch.qos.logback.classic.Logger logger = (ch.qos.logback.classic.Logger) LoggerFactory
 			.getLogger(CommandLineAppStartupRunner.class);
+	
+	private static ObjectMapper objectMapper=new ObjectMapper();
+	
+	@Value("classpath:defaultValues/users.json")
+	private Resource userRecords;
 
 	private UserService userService;
 	private GeneralConfigurationService generalConfigurationService;
+	private TestTypeService testTypeService;
+	private ChangeTypeService changeTypeService;
+	private ApplicationConfigurationService applicationConfigurationService;
 	
 	private static final String ADMIN_USERNAME="admin";
 
 	@Autowired
 	public CommandLineAppStartupRunner(UserService userService,
-			GeneralConfigurationService generalConfigurationService) {
+			GeneralConfigurationService generalConfigurationService,
+			TestTypeService testTypeService,
+			ChangeTypeService changeTypeService,
+			ApplicationConfigurationService applicationConfigurationService) {
 		this.userService = userService;
 		this.generalConfigurationService = generalConfigurationService;
+		this.testTypeService=testTypeService;
+		this.changeTypeService=changeTypeService;
+		this.applicationConfigurationService=applicationConfigurationService;
 	}
 
 	@Override
@@ -49,18 +73,14 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		}
 	}
 
-	private void loadDefaultUser() {
+	private void loadDefaultUser() throws StreamReadException, DatabindException, IOException {
 		if (userService.getAll().isEmpty()) {
 			logger.warn("No users were found. Default user will be created.");
-			UserDTO user = new UserDTO();
-			user.setUsername(ADMIN_USERNAME);
-			user.setPassword(ADMIN_USERNAME);
-			user.setFirstName(ADMIN_USERNAME);
-			user.setLastName("LNU");
-			user.setEmail(ADMIN_USERNAME + "@company.com");
-			user.setRoles(Set.of(Role.ADMIN, Role.TESTER));
-			userService.save(user);
-			logger.info("User added with username: {} and password: {}", ADMIN_USERNAME,ADMIN_USERNAME);
+			UserDTO users[]=objectMapper.readValue(userRecords.getContentAsByteArray(),UserDTO[].class);
+			List.of(users).stream().forEach(user -> {
+				UserDTO savedUser=this.userService.save(user);
+				logger.info("User Saved: {}",savedUser);
+			});
 		}
 	}
 
