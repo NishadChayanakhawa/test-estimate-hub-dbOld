@@ -30,3 +30,7 @@ Feature: Controller tests
 	Scenario: Get release controller
 		When GET request is submitted to "http://localhost:8999/release"
 		Then Response status code should be 500
+		
+	Scenario: Get change controller
+		When GET request is submitted to "http://localhost:8999/change"
+		Then Response status code should be 500

@@ -63,7 +63,10 @@ public class ChangeService {
 		ReleaseDTO release = this.releaseService.get(changeToSaveDTO.getReleaseId());
 		if (changeToSaveDTO.getStartDate().isBefore(release.getStartDate())
 				|| changeToSaveDTO.getEndDate().isAfter(release.getEndDate())) {
-			throw new TransactionException("startDate-endDate do not align with selected release");
+			throw new TransactionException("startDate-endDate do not align with selected release start and end dates");
+		}
+		if(changeToSaveDTO.getEndDate().isBefore(changeToSaveDTO.getStartDate())) {
+			throw new TransactionException("startDate-endDate are incorrect. Start date cannot be before end date");
 		}
 		try {
 			// save change record
