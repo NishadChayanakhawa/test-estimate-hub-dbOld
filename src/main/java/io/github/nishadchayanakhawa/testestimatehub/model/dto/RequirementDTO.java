@@ -1,5 +1,6 @@
 package io.github.nishadchayanakhawa.testestimatehub.model.dto;
 
+import java.util.Set;
 //import section
 //jav util
 //lombok
@@ -37,4 +38,7 @@ public class RequirementDTO {
 	@NonNull
 	@Setter(AccessLevel.NONE)
 	private String summary;
+	
+	// use cases
+	Set<UseCaseDTO> useCases;
 }

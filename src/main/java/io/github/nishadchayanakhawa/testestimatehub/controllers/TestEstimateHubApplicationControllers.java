@@ -4,23 +4,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import io.github.nishadchayanakhawa.testestimatehub.services.ReleaseService;
 import io.github.nishadchayanakhawa.testestimatehub.services.ChangeTypeService;
 import io.github.nishadchayanakhawa.testestimatehub.services.ApplicationConfigurationService;
+import io.github.nishadchayanakhawa.testestimatehub.services.ChangeService;
+import io.github.nishadchayanakhawa.testestimatehub.services.TestTypeService;
 
 @Controller
 public class TestEstimateHubApplicationControllers {
 	private ReleaseService releaseService;
 	private ChangeTypeService changeTypeService;
+	private ChangeService changeService;
 	private ApplicationConfigurationService applicationConfigurationService;
+	private TestTypeService testTypeService;
 
 	@Autowired
 	public TestEstimateHubApplicationControllers(ReleaseService releaseService, ChangeTypeService changeTypeService,
-			ApplicationConfigurationService applicationConfigurationService) {
+			ChangeService changeService,
+			ApplicationConfigurationService applicationConfigurationService,
+			TestTypeService testTypeService) {
 		this.releaseService = releaseService;
 		this.changeTypeService = changeTypeService;
+		this.changeService=changeService;
 		this.applicationConfigurationService = applicationConfigurationService;
+		this.testTypeService=testTypeService;
 	}
 
 	@GetMapping("/login")
@@ -69,5 +78,12 @@ public class TestEstimateHubApplicationControllers {
 		model.addAttribute("changeTypes", this.changeTypeService.getAll());
 		model.addAttribute("applicationConfigurationRecords", this.applicationConfigurationService.getAll());
 		return "record/change";
+	}
+	
+	@GetMapping("/estimationForm/{id}")
+	public String getChangeEstimationFormPage(@PathVariable Long id,Model model) {
+		model.addAttribute("change", this.changeService.get(id));
+		model.addAttribute("testTypes", this.testTypeService.getAll());
+		return "record/estimationForm";
 	}
 }

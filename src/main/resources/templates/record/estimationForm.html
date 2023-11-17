@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head th:insert="~{BasePage :: headSection(title=~{::title/text()},script=~{::script},style=~{::style},link=~{::link})}"
+	th:remove="tag">
+	<title>Test Estimate Hub</title>
+	<link th:href="@{/datatable/css/datatables.min.css}" rel="stylesheet" />
+	<link th:href="@{/toastr/css/toastr.min.css}" rel="stylesheet" />
+	<script th:src="@{/application/js/common/apiHandling.js}"></script>
+	<script th:src="@{/jquery/js/jquery.tmpl.js}"></script>
+	<script th:src="@{/toastr/js/toastr.min.js}"></script>
+	<script th:src="@{/application/js/common/common.js}"></script>
+	<script th:src="@{/application/js/common/logging.js}"></script>
+	<script th:src="@{/application/js/common/teh.js}"></script>
+	<script th:src="@{/application/js/record/estimationForm.js}"></script>
+	<script th:src="@{/datatable/js/datatables.min.js}"></script>
+	<script th:src="@{/datatable/js/dataTables.bootstrap5.min.js}"></script>
+	<script th:src="@{/jquery/js/jquery-ui.min.js}"></script>
+	<link th:href="@{/jquery/css/jquery-ui.min.css}" rel="stylesheet" />
+	<script>
+		$(document).ready(function () {
+			estimationForm.init();
+		});
+	</script>
+	<script id="useCaseTemplate" type="text/template">
+		<tr>
+			
+			<td name="useCaseSummary">${summary}</td>
+			<td name="useCaseActions">
+				<textarea name="useCaseJson" class="yet-to-update visually-hidden"></textarea>
+				<button class="border-0 bg-transparent" name="editUseCaseButton">
+					<i class="fa fa-edit"></i> Edit
+				</button>
+				<button class="border-0 bg-transparent text-danger" name="deleteUseCaseButton">
+					<i class="fa fa-trash"></i> Delete
+				</button>
+			</td>
+		</tr>
+	</script>
+</head>
+
+<body>
+	<input th:replace="~{BasePage :: csrfElement}" />
+
+	<nav th:replace="~{BasePage :: pageHeader(subTitle='Estimation Form')}"></nav>
+	<br>
+	<div class="container">
+		<div class="row align-items-start">
+			<div class="col-1 bg-body-secondary">
+				Release
+			</div>
+			<div class="col-11 bg-body-tertiary">
+				<span th:text="${change.releaseName}">Release Name</span> (<span
+					th:text="${change.releaseIdentifier}">Release ID</span>)
+			</div>
+		</div>
+		<div class="row align-items-start">
+			<div class="col-1 bg-body-secondary">
+				Change
+			</div>
+			<div class="col-11 bg-body-tertiary">
+				<span th:text="${change.summary}">Release Name</span> (<span th:text="${change.identifier}">Release
+					ID</span>)
+			</div>
+		</div>
+		<div class="row align-items-start">
+			<div class="col-1 bg-body-secondary">
+				Schedule
+			</div>
+			<div class="col-11 bg-body-tertiary">
+				<span th:text="${change.startDate}">Release Name</span> to <span th:text="${change.endDate}">Release
+					ID</span>
+			</div>
+		</div>
+		<hr>
+		<div class="row mb-3">
+			<th:block th:each="requirement : ${change.requirements}">
+				<div class="col-10">
+					<span th:aria-label="'requirement_' + ${requirement.id}"
+						th:aria-describedby="'addUseCases_' + ${requirement.id}"
+						th:text="${requirement.identifier} + ' - ' + ${requirement.summary}"></span> <span
+						class="badge rounded-pill text-bg-secondary align-middle" th:id="'useCaseCountPill_' + ${requirement.id}"
+						th:text="'Use Case(s): ' + ${#lists.size(requirement.useCases)}">Primary</span>
+				</div>
+				<button class="btn btn-outline-primary col-2 mt-1 mb-1" type="button"
+					th:id="'addUseCases_' + ${requirement.id}">Manage Use
+					Cases</button>
+			</th:block>
+		</div>
+	</div>
+
+	<div class="modal fade" id="useCaseModal" tabindex="-1" aria-labelledby="useCaseModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-dialog-scrollable modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="useCaseModalLabel">Manage Use Cases</h1>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<input type="hidden" name="id" id="masterRequirementId" />
+					<button class="btn btn-sm btn-success" id="showUseCaseFormButton"
+						data-bs-target="#useCaseFormModal" data-bs-toggle="modal">
+						<i class="fa fa-plus"></i> Add Use Case
+					</button>
+					<table class="table table-striped" id="useCaseTable">
+						<caption>Use Cases</caption>
+						<thead>
+							<tr>
+								<th>Summary</th>
+								<th>Actions</th>
+							</tr>
+						</thead>
+						<tbody id="useCaseTableBody">
+						</tbody>
+					</table>
+					<hr>
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+					<button id="saveUseCasesButton" class="btn btn-primary">Save use cases</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="useCaseFormModal" tabindex="-1" aria-labelledby="useCaseFormModalLabel"
+		aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+		<div class="modal-dialog modal-dialog-scrollable modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h1 class="modal-title fs-5" id="useCaseFormModalLabel">Add/Edit Use Cases</h1>
+					<button type="button" class="btn-close" data-bs-target="#useCaseModal"
+						data-bs-toggle="modal"></button>
+				</div>
+				<div class="modal-body">
+					<form id="addUseCaseForm" autocomplete="off">
+						<div class="row mb-3">
+							<input type="hidden" class="form-control" id="id" name="id" />
+							<input type="hidden" class="form-control" id="requirementId" name="requirementId" />
+							<div class="col-12">
+								<label class="form-label" for="summary">Summary</label>
+								<input type="text" class="form-control" id="summary" name="summary" required>
+							</div>
+							<div class="col-8">
+								<label class="form-label" for="releaseId">Functionality</label>
+								<select class="form-select" id="businessFunctionalityId" name="businessFunctionalityId"
+									required>
+									<th:block th:each="functionality : ${change.impactedArea}">
+										<option th:value="${functionality.id}"
+											th:text="${functionality.application} + ' - ' + ${functionality.module} + ' - ' + ${functionality.subModule}">
+											July 2023
+										</option>
+									</th:block>
+								</select>
+							</div>
+							<div class="col-4">
+								<label class="form-label" for="summary">Data Variation Count</label>
+								<input type="text" class="form-control" id="dataVariationCount"
+									name="dataVariationCount" required>
+							</div>
+							<div class="col-3 mt-1">
+								<label class="form-label" for="testConfigurationComplexityCode">Test Configuration
+									Complexity</label>
+								<select class="form-select" id="testConfigurationComplexityCode"
+									name="testConfigurationComplexityCode" required>
+									<option value="LOW">Low</option>
+									<option value="VERY_LOW">Very Low</option>
+									<option value="MEDIUM">Medium</option>
+									<option value="HIGH">High</option>
+									<option value="VERY_HIGH">Very High</option>
+								</select>
+							</div>
+							<div class="col-3 mt-1">
+								<label class="form-label" for="testDataSetupComplexityCode">Test Data Setup
+									Complexity</label>
+								<select class="form-select" id="testDataSetupComplexityCode"
+									name="testDataSetupComplexityCode" required>
+									<option value="LOW">Low</option>
+									<option value="VERY_LOW">Very Low</option>
+									<option value="MEDIUM">Medium</option>
+									<option value="HIGH">High</option>
+									<option value="VERY_HIGH">Very High</option>
+								</select>
+							</div>
+							<div class="col-3 mt-1">
+								<label class="form-label" for="testTransactionComplexityCode">Test Transaction
+									Complexity</label>
+								<select class="form-select" id="testTransactionComplexityCode"
+									name="testTransactionComplexityCode" required>
+									<option value="LOW">Low</option>
+									<option value="VERY_LOW">Very Low</option>
+									<option value="MEDIUM">Medium</option>
+									<option value="HIGH">High</option>
+									<option value="VERY_HIGH">Very High</option>
+								</select>
+							</div>
+							<div class="col-3 mt-1">
+								<label class="form-label" for="testValidationComplexityCode">Test Validation
+									Complexity</label>
+								<select class="form-select" id="testValidationComplexityCode"
+									name="testValidationComplexityCode" required>
+									<option value="LOW">Low</option>
+									<option value="VERY_LOW">Very Low</option>
+									<option value="MEDIUM">Medium</option>
+									<option value="HIGH">High</option>
+									<option value="VERY_HIGH">Very High</option>
+								</select>
+							</div>
+							<label class="form-label mt-2">Select applicable test type(s):</label>
+							<div class="btn-group" role="group" aria-label="Basic checkbox toggle button group">
+								<th:block th:each="testType : ${testTypes}">
+									<input type="checkbox" class="btn-check" th:id="'testType_' + ${testType.id}"
+										autocomplete="off" name="applicableTestTypes" th:aria-label="${testType.name}">
+									<label class="btn btn-outline-primary" th:for="'testType_' + ${testType.id}"
+										th:text="${testType.name}">Checkbox 1</label>
+								</th:block>
+							</div>
+						</div>
+						<hr>
+						<button id="backToUseCaseListButton" type="button" class="btn btn-secondary"
+							data-bs-target="#useCaseModal" data-bs-toggle="modal">Back to Use Case List</button>
+						<button id="addUseCaseButton" type="submit" class="btn btn-primary">Save changes</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+</html>

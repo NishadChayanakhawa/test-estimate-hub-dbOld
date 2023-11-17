@@ -8,10 +8,12 @@
 	"endDate" : "2023-11-08",
 	"requirements" : [
 		{
+			"id" : "${requirementId1}",
 			"identifier" : "BN01",
 			"summary" : "User Management"
 		},
 		{
+			"id" : "${requirementId2}",
 			"identifier" : "BN03",
 			"summary" : "Change Type Management"
 		}

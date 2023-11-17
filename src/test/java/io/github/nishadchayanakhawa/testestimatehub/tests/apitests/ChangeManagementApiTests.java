@@ -5,6 +5,7 @@ import io.cucumber.testng.CucumberOptions;
 
 @CucumberOptions(
 		features = "src/test/resources/Features/07_ChangeManagementApiTests.feature",
-		glue = "io.nishadc.automationtestingframework.testinginterface.restapi.stepdefinitions")
+		glue = "io.nishadc.automationtestingframework.testinginterface.restapi.stepdefinitions",
+		tags="not @disabled")
 public class ChangeManagementApiTests extends AbstractTestNGCucumberTests{
 }

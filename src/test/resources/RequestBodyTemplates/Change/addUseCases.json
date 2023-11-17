@@ -1,0 +1,34 @@
+{
+	"id": "${requirementId}",
+	"useCases": [
+		{
+			"summary": "Use case I",
+			"dataVariationCount": 1,
+			"businessFunctionalityId": "${applicationConfigurationId}",
+			"testConfigurationComplexityCode": "LOW",
+			"testDataSetupComplexityCode": "LOW",
+			"testTransactionComplexityCode": "LOW",
+			"testValidationComplexityCode": "LOW",
+			"applicableTestTypes": [
+				{
+					"id": "${testTypeId}"
+				}
+			]
+		},
+		{
+			"requirementId" : "${requirementId}",
+			"summary": "Use case II",
+			"dataVariationCount": 2,
+			"businessFunctionalityId": "${applicationConfigurationId}",
+			"testConfigurationComplexityCode": "VERY_LOW",
+			"testDataSetupComplexityCode": "VERY_LOW",
+			"testTransactionComplexityCode": "VERY_LOW",
+			"testValidationComplexityCode": "VERY_LOW",
+			"applicableTestTypes": [
+				{
+					"id": "${testTypeId}"
+				}
+			]
+		}
+	]
+}
