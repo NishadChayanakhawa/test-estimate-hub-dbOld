@@ -26,9 +26,6 @@ import io.github.nishadchayanakhawa.testestimatehub.services.ChangeTypeService;
 import io.github.nishadchayanakhawa.testestimatehub.services.ApplicationConfigurationService;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.EntityNotFoundException;
 import io.github.nishadchayanakhawa.testestimatehub.services.exceptions.TestEstimateHubExceptions;
-
-import com.fasterxml.jackson.core.exc.StreamReadException;
-import com.fasterxml.jackson.databind.DatabindException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Component
@@ -39,16 +36,16 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 
 	private static ObjectMapper objectMapper = new ObjectMapper();
 
-	@Value("classpath:defaultValues/qa/users.json")
+	@Value("${user.records}")
 	private Resource userRecords;
 
-	@Value("classpath:defaultValues/qa/applicationConfigurations.json")
+	@Value("${applicationConfiguration.records}")
 	private Resource applicationConfigurationRecords;
 	
-	@Value("classpath:defaultValues/qa/testTypes.json")
+	@Value("${testType.records}")
 	private Resource testTypeRecords;
 	
-	@Value("classpath:defaultValues/qa/changeTypes.json")
+	@Value("${changeType.records}")
 	private Resource changeTypeRecords;
 
 	private UserService userService;
@@ -83,10 +80,10 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		}
 	}
 
-	private void loadDefaultUser() throws StreamReadException, DatabindException, IOException {
+	private void loadDefaultUser() throws IOException {
 		if (userService.getAll().isEmpty()) {
 			logger.warn("No users were found. Default user will be created.");
-			UserDTO users[] = objectMapper.readValue(userRecords.getContentAsByteArray(), UserDTO[].class);
+			UserDTO[] users = objectMapper.readValue(userRecords.getContentAsByteArray(), UserDTO[].class);
 			List.of(users).stream().forEach(user -> {
 				UserDTO savedUser = this.userService.save(user);
 				logger.info("User Saved: {}", savedUser);
@@ -114,7 +111,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		}
 	}
 
-	private void loadApplicationConfigurations() throws StreamReadException, DatabindException, IOException {
+	private void loadApplicationConfigurations() throws IOException {
 		if (this.applicationConfigurationService.getAll().isEmpty()) {
 			ApplicationConfigurationDTO[] applicationConfigurations = objectMapper.readValue(
 					applicationConfigurationRecords.getContentAsByteArray(), ApplicationConfigurationDTO[].class);
@@ -126,7 +123,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		}
 	}
 	
-	private void loadTestTypes() throws StreamReadException, DatabindException, IOException {
+	private void loadTestTypes() throws IOException {
 		if (this.testTypeService.getAll().isEmpty()) {
 			TestTypeDTO[] testTypes = objectMapper.readValue(
 					testTypeRecords.getContentAsByteArray(), TestTypeDTO[].class);
@@ -138,7 +135,7 @@ public class CommandLineAppStartupRunner implements CommandLineRunner {
 		}
 	}
 	
-	private void loadChangeTypes() throws StreamReadException, DatabindException, IOException {
+	private void loadChangeTypes() throws IOException {
 		if (this.changeTypeService.getAll().isEmpty()) {
 			ChangeTypeDTO[] changeTypes = objectMapper.readValue(
 					changeTypeRecords.getContentAsByteArray(), ChangeTypeDTO[].class);

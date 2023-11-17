@@ -79,14 +79,10 @@ public class ChangeService {
 			// save change record
 			if (changeToSaveDTO.getId() != null) {
 				ChangeDTO existingChangeDTO = this.get(changeToSaveDTO.getId());
-				existingChangeDTO.getRequirements().stream().forEach(requirement -> {
-					changeToSaveDTO.getRequirements().stream()
-							.filter(existingRequirement -> existingRequirement.getId() == requirement.getId())
-							.findFirst().ifPresent(matchedRequirement -> {
-								matchedRequirement.setUseCases(requirement.getUseCases());
-							});
-//							.findFirst().e .get().setUseCases(requirement.getUseCases());
-				});
+				existingChangeDTO.getRequirements().stream().forEach(requirement -> changeToSaveDTO.getRequirements()
+						.stream().filter(existingRequirement -> existingRequirement.getId() == requirement.getId())
+						.findFirst()
+						.ifPresent(matchedRequirement -> matchedRequirement.setUseCases(requirement.getUseCases())));
 			}
 			ChangeDTO savedChangeDTO = modelMapper
 					.map(this.changeRepository.save(modelMapper.map(changeToSaveDTO, Change.class)), ChangeDTO.class);
