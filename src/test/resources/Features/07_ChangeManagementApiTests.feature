@@ -43,6 +43,10 @@ Feature: Change management tests
 		And Save value at Json Path "requirements[0].id" in response, to variable "requirementId1"
 		And Save value at Json Path "requirements[1].id" in response, to variable "requirementId2"
 		
+	Scenario: Get requirement
+		When GET request is submitted to "http://localhost:8999/api/change/requirement/1"
+		Then Response status code should be 200
+		
 	Scenario: Update change
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/updateChange.json"
@@ -120,6 +124,16 @@ Feature: Change management tests
 		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
 		And In request body template, replace "${testTypeId}" with value of variable "addedTestTypeForChangeId"
 		When PUT request is submitted to "http://localhost:8999/api/change/useCases"
+		Then Response status code should be 200
+		
+	@disabled
+	Scenario: Add use case
+		Given In request header, set "Content-Type" to "application/json"
+		And Request body template is loaded from file "Change/addUseCase.json"
+		And In request body template, replace "${requirementId}" with value of variable "requirementId1"
+		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
+		And In request body template, replace "${testTypeId}" with value of variable "addedTestTypeForChangeId"
+		When PUT request is submitted to "http://localhost:8999/api/change/useCase"
 		Then Response status code should be 200
 		
 	Scenario: Delete change

@@ -82,7 +82,10 @@ public class ChangeService {
 				existingChangeDTO.getRequirements().stream().forEach(requirement -> {
 					changeToSaveDTO.getRequirements().stream()
 							.filter(existingRequirement -> existingRequirement.getId() == requirement.getId())
-							.findFirst().get().setUseCases(requirement.getUseCases());
+							.findFirst().ifPresent(matchedRequirement -> {
+								matchedRequirement.setUseCases(requirement.getUseCases());
+							});
+//							.findFirst().e .get().setUseCases(requirement.getUseCases());
 				});
 			}
 			ChangeDTO savedChangeDTO = modelMapper
@@ -194,13 +197,6 @@ public class ChangeService {
 		RequirementDTO originalRequirement = this.getRequirement(requirementWithUseCasesToSave.getId());
 		// set use cases
 		originalRequirement.setUseCases(requirementWithUseCasesToSave.getUseCases());
-
-		// set requirement id if it doesnt exist
-		originalRequirement.getUseCases().stream().forEach(useCase -> {
-			if (useCase.getRequirementId() == null) {
-				useCase.setRequirementId(originalRequirement.getId());
-			}
-		});
 
 		// save requirement with attached use cases
 		RequirementDTO savedRequirementWithUseCases = modelMapper.map(
