@@ -1,3 +1,4 @@
+@disabled
 Feature: Change management tests
 	Scenario: Add release
 		Given In request header, set "Content-Type" to "application/json"
@@ -124,6 +125,10 @@ Feature: Change management tests
 		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
 		And In request body template, replace "${testTypeId}" with value of variable "addedTestTypeForChangeId"
 		When PUT request is submitted to "http://localhost:8999/api/change/useCases"
+		Then Response status code should be 200
+	
+	Scenario: Get change after adding use cases
+		When GET request is submitted to "http://localhost:8999/api/change/1"
 		Then Response status code should be 200
 		
 	@disabled

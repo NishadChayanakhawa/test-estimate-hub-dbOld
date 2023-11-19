@@ -3,7 +3,6 @@ package io.github.nishadchayanakhawa.testestimatehub.services;
 //import section
 //java-util
 import java.util.List;
-
 //model mapper
 import org.modelmapper.ModelMapper;
 //logger
@@ -137,7 +136,22 @@ public class ChangeService {
 	public ChangeDTO get(Long id) {
 		// retreive change based on id
 		logger.debug("Retreiving change for id {}", id);
-		ChangeDTO changeDTO = modelMapper.map(this.changeRepository.findById(id).orElseThrow(), ChangeDTO.class);
+		//ChangeDTO changeDTO = modelMapper.map(this.changeRepository.findById(id).orElseThrow(), ChangeDTO.class);
+		Change change=this.changeRepository.findById(id).orElseThrow();
+		ChangeDTO changeDTO = modelMapper.map(change, ChangeDTO.class);
+//		changeDTO.setRequirements(change.getRequirements().stream()
+//				.map(requirement -> modelMapper.map(requirement, RequirementDTO.class))
+//				.collect(Collectors.toSet()));
+//		changeDTO.getRequirements().stream()
+//			.forEach(requirement -> {
+//				Set<UseCaseDTO> useCases=
+//						change.getRequirements().stream()
+//						.filter(originalRequirement-> originalRequirement.getId()==requirement.getId())
+//						.findFirst().get()
+//						.getUseCases().stream()
+//						.map(useCase -> modelMapper.map(useCase, UseCaseDTO.class)).collect(Collectors.toSet());
+//				requirement.setUseCases(useCases);
+//			});
 		logger.debug("Retreived change: {}", changeDTO);
 		// return change
 		return changeDTO;
