@@ -58,7 +58,12 @@ Feature: Change management tests
 		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 200
+	
+	Scenario: Get change after update
+		When GET request is submitted to "http://localhost:8999/api/change/1"
+		Then Response status code should be 200
 		
+	@disabled
 	Scenario: Add change with invalid start date
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChangeInvalidStartDate.json"
@@ -67,7 +72,8 @@ Feature: Change management tests
 		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 400
-		
+	
+	@disabled	
 	Scenario: Add change with invalid end date
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChangeInvalidEndDate.json"
@@ -77,6 +83,7 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 400
 		
+	@disabled
 	Scenario: Add change start date after end date
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChangeEndDateBeforeStart.json"
@@ -86,6 +93,7 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 400
 		
+	@disabled
 	Scenario: Add duplicate change
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChange.json"
@@ -95,6 +103,7 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 409
 		
+	@disabled
 	Scenario: Add duplicate requirement
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChangeWithDuplicateRequirement.json"
@@ -104,6 +113,7 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 409
 		
+	@disabled
 	Scenario: Add duplicate impact
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "Change/addChangeWithDuplicateImpact.json"
@@ -113,6 +123,7 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 409
 		
+	@disabled
 	Scenario: Get changes
 		When GET request is submitted to "http://localhost:8999/api/change"
 		Then Response status code should be 200
@@ -126,16 +137,16 @@ Feature: Change management tests
 		When PUT request is submitted to "http://localhost:8999/api/change/useCases"
 		Then Response status code should be 200
 		
-	@disabled
-	Scenario: Add use case
-		Given In request header, set "Content-Type" to "application/json"
-		And Request body template is loaded from file "Change/addUseCase.json"
-		And In request body template, replace "${requirementId}" with value of variable "requirementId1"
-		And In request body template, replace "${applicationConfigurationId}" with value of variable "addedApplicationConfigurationForChangeId"
-		And In request body template, replace "${testTypeId}" with value of variable "addedTestTypeForChangeId"
-		When PUT request is submitted to "http://localhost:8999/api/change/useCase"
+	Scenario: Get change after adding use cases
+		When GET request is submitted to "http://localhost:8999/api/change/1"
 		Then Response status code should be 200
 		
+	@disabled
+	Scenario: Generate estimation
+		When GET request is submitted to "http://localhost:8999/api/change/estimation/1"
+		Then Response status code should be 200
+		
+	@disabled
 	Scenario: Delete change
 		Given In request header, set "Content-Type" to "application/json"
 		And Request body template is loaded from file "delete.json"

@@ -1,7 +1,9 @@
 {
 	"id": "${requirementId}",
+	"changeId": 1,
 	"useCases": [
 		{
+			"requirementId": "${requirementId}",
 			"summary": "Use case I",
 			"dataVariationCount": 1,
 			"businessFunctionalityId": "${applicationConfigurationId}",
@@ -16,7 +18,7 @@
 			]
 		},
 		{
-			"requirementId" : "${requirementId}",
+			"requirementId": "${requirementId}",
 			"summary": "Use case II",
 			"dataVariationCount": 2,
 			"businessFunctionalityId": "${applicationConfigurationId}",

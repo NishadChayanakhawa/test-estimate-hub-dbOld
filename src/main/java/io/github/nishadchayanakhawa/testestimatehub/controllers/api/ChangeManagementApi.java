@@ -99,6 +99,14 @@ public class ChangeManagementApi {
 		// return test type record
 		return new ResponseEntity<>(this.changeService.getRequirement(id), HttpStatus.OK);
 	}
+	
+	@GetMapping(path = "/estimation/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
+	ResponseEntity<ChangeDTO> getEstimation(@PathVariable Long id) {
+		logger.debug(TestEstimateHubConstants.SERVING_GET_REQUEST_DEBUG_MESSAGE, "GET",
+				TestEstimateHubConstants.CHANGE_MANAGEMENT_API + "/estimation", id);
+		// return test type record
+		return new ResponseEntity<>(this.changeService.generateEstimates(id), HttpStatus.OK);
+	}
 
 	/**
 	 * <b>Method Name</b>: getAll<br>
